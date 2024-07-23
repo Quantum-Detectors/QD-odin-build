@@ -1,0 +1,6 @@
+* text=auto
+*.sh text eol=lf
+*.conf text eol=lf
+epics/* eol=lf
+scripts/* eol=lf
+*.json text eol=lf

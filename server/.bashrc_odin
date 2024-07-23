@@ -1,0 +1,24 @@
+# BASHRC file to set up user paths and applications
+export EPICS_BASE=/odin/epics/epics-base
+export EPICS_EXTENSIONS=/odin/epics/extensions
+
+# Update path to include EPICS binaries
+PATH=$PATH:$EPICS_BASE/bin/linux-x86_64:$EPICS_EXTENSIONS/bin/linux-x86_64
+
+# Set EDM macros
+export EDM_CONFIG_DIR=/odin/epics/edm
+
+export EDMOBJECTS=$EDM_CONFIG_DIR
+export EDMPVOBJECTS=$EDM_CONFIG_DIR
+export EDMHELPFILES=$EDM_CONFIG_DIR/helpFiles
+export EDMFILES=$EDM_CONFIG_DIR
+export EDMDATAFILES=$EDM_CONFIG_DIR
+
+# EPICS configuration
+export EPICS_CA_ADDR_LIST="127.255.255.255"
+export EPICS_CA_AUTO_ADDR_LIST=NO
+export EPICS_CA_SERVER_PORT=6064
+export EPICS_CA_REPEATER_PORT=6065
+
+# HDF5 filters
+export HDF5_PLUGIN_PATH=/odin/prefix/h5plugin
