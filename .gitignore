@@ -16,3 +16,5 @@ __pycache__/
 
 # Test directories
 test_data/
+dev_venv/
+test_venv/

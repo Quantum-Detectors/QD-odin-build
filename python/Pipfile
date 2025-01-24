@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pyxspress = {editable = true, extras = ["dev"], path = "."}
+
+[packages]
+pyxspress = {editable = true, path = "."}
+
+[scripts]
+# Linting
+flake8 = "flake8 src/ --benchmark"
+black = "black src/"
+isort = "isort src/"
+mypy = "mypy src/"
+# Module build
+build = "python -m build -w"

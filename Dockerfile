@@ -47,7 +47,7 @@ RUN yum -y install xorg-x11-fonts* liberation-fonts
 RUN yum -y install procServ telnet
 
 # Other tools
-RUN yum -y install procps
+RUN yum -y install procps numactl
 
 # EPICS configuration and RELEASE files
 RUN mkdir /odin/epics/config

@@ -437,9 +437,10 @@ typedef enum
 	Xsp3Init_Normal	= 1,
 	
 	Xsp3InitUDP_DisUDPRegs	= 0x10000,		//!< Disable setup of UDP registers in UDP core.
-	Xsp3InitUDP_DisScopeSocket = 0x20000,	//!< Disable creation of socket for sending playack and receiving scope mode data
+	Xsp3InitUDP_DisScopeSocket = 0x20000,	//!< Disable creation of socket for sending playback and receiving scope mode data
 	Xsp3InitUDP_DisHistLUT	= 0x40000,		//!< Disable writing of Lookup table for farm mode destination sockets.
-	Xsp3InitUDP_DisHistThreads= 0x80000		//!< Disable creation of histogram RX sockets and threads.
+	Xsp3InitUDP_DisHistThreads= 0x80000,		//!< Disable creation of histogram RX sockets and threads.  Also used to disable creating TCP sockets and threads for Xspress2 mini Active readout
+	Xsp3InitUDP_DisMakeModules= 0x100000		//!< Disable creation of histogram data modules in XSPRESS3, 3 and XSPRESS3 mini active readout
 } Xsp3Init;
 
 typedef struct _XSP3Path {
@@ -1039,7 +1040,7 @@ int xsp3m_scalar_mkmod(int path, char * mod_name, int num_tf);
 int xsp3m_scaler_mod_clear(int path, int first_chan, int first_frame, int num_chan, int num_frames);
 int xsp3m_scaler_read_mod(int path, u_int32_t *dest, unsigned first_scaler, unsigned first_chan, unsigned first_t, unsigned n_scalers, unsigned n_chan, unsigned dt);
 int xsp3m_config_readout_tcp(int path, int card, const char* hostname, int tcp_port);
-int xsp3m_restart_readout_tcp(int path, int card);
+int xsp3m_restart_readout_tcp(int path, int card, Xsp3Init disable_udp_init);
 int xsp3m_set_readout_mode(int path, int card, u_int32_t readout_mode);
 int xsp3m_get_readout_mode(int path,  int card, u_int32_t *readout_mode);
 volatile Histogram * xsp3_get_histogram_ptr(int path, int card, int chan_of_card);
@@ -1802,7 +1803,7 @@ int xsp3_system_stop(int path, int card);
 #define XSP3_GLOB_GLOB_RST_GEN_A	13
 #define XSP3_GLOB_GLOB_RST_GEN_B	14
 
-#define XSP3_GLOB_ITFG_MARKER		15	// Not included in save restroe of global registers.
+#define XSP3_GLOB_ITFG_MARKER		15	// Not included in save restore of global registers.
 
 #define XSP3_GLOB_FAN_SPEED 		31
 
@@ -2846,31 +2847,45 @@ typedef struct _x3m_fan_cont
 */
 //! [XSP3M_ADC_CONTROL_CODE]
 #define XSP3M_ADC_CONT_CLK_SEL_LMK61E2  (1<<7)			//!< Select LMK61E2 Clock generator fro LMK61E2 rather than CDCM61004
-#define XSP3M2_ADC_CONT_CLK_SEL_BKPLN  	(1<<7)			//!< Select clock from backplane (usually LMK61E2) rather than on board LMK61E2 Clock generator
-#define XSP3M2_ADC_CONT_CLK_ENB			(1<<10)			//!< Enable the ADC board Clock either on board or from backplane.
-	
-
+// (1<<8) unused in mk1
+#define XSP3M_ADC_CONT_DITHER 			(1<<9)
+// Bits 11:10 unused in mk1, but XSP3M_ADC_CONT_USER_TERM would set bits for future expansion.
 #define XSP3M_ADC_CONT_USER_NOE(x)	(((x)&0xF)<<12)	//!< Output Disable for full strength output drive, leave 50 ohm terminated drivers enables. 2 bit is X3m, 4 in X3X+.
+// Bits 15:14 are unused in both, potentially reserved for nOE for 4 TTL OUT
 #define XSP3M_ADC_CONT_SHUTDOWN(x)	(((x)&3)<<16)	//!< Shutdown signals for ADC channels 0 and 1
+// Bits   27:18  Unused in Mk1
+#define XSP3M1_ADC_CONT_USER_TERM(x) (((x)&3)<<28)	//!< Enable 50 ohm termination on User Inputs 0 and 1
+#define XSP3M1_ADC_CONT_GET_USER_TERM(x) (((x)>>28)&3)	//!< Enable 50 ohm termination on User Inputs 0 and 1
 
-#define XSP3M_ADC_CONT_USER_TERM(x) ((((x)&3)<<28)|(((x)&0xC)<<(10-2)))	//!< Enable 50 ohm termination on User Inputs 0 and 1, Extra 2 bit in 10 and 11 for X3X+
+#define XSP3M_ADC_CONT_IGNORE_OVER_TEMP	(1<<30)		//!< Ignore over temperature shutdown of ADCs, X3M Mk1 and Mk2
+#define XSP3M_ADC_CONT_PSU_ENB			(1<<31)		//!< PSU Enable	Enable PSU to ADC board, X3M Mk1 and Mk2
+
+
+#define XSP3M2_ADC_CONT_CLK_SEL_BKPLN  	(1<<7)		//!< Select clock from backplane (usually LMK61E2) rather than on board LMK61E2 Clock generator
+													//!< Also select FIFO enb to start channels together
+// (1<<8) unused in mk2
+// (1<<9) unused in mk2	
+#define XSP3M2_ADC_CONT_CLK_ENB			(1<<10)		//!< Enable the ADC board Clock either on board or from backplane.
+// bit 11 Part of 	XSP3M_ADC_CONT_USER_TERM
+// Bit[15:12] see XSP3M_ADC_CONT_USER_NOE also in mk2
+// Bit 17:16 See XSP3M_ADC_CONT_SHUTDOWN
+// Bit 19:18  Unused
 
 #define XSP3M2_ADC_CONT_RESET_BUFR		(1<<20)		//!< Hold BUFR in reset, current plan is to do this with clock stopped.
 #define XSP3M2_ADC_CONT_RESET			(1<<21)		//!< Force reset of ADC capture circuit.
-#define XSP3M2_ADC_CONT_ENB_BIT_SLIP		(1<<22)		//!< Enable the bit slip adjustment, ADC must be send test pattern to do this.
+#define XSP3M2_ADC_CONT_ENB_BIT_SLIP	(1<<22)		//!< Enable the bit slip adjustment, ADC must be send test pattern to do this.
 #define XSP3M2_ADC_CONT_ENB_EYE_MONITOR	(1<<23)		//!< Enable eye monitor test feature  - exclusive with phase detection and correction.
 #define XSP3M2_ADC_CONT_DIS_PHASE_DETECTOR (1<<24)	//!< Disable phase detector to allow eye monitor to be used. Normally = 0 = enabled.
 #define XSP3M2_ADC_CONT_DIS_DERANDOMIZE	(1<<25)		//!< Disable derandomizing of ADC data for Xspress3mini+ ADC test patterns.
 #define XSP3M2_ADC_CONT_ENB_ADC_FIFO	(1<<26)		//!< Enable ADC Data FIFO, set after serde and bitslip finished.
 #define XSP3M2_ADC_CONT_ENB_ALT_BIT_POL	(1<<27)		//!< Enable ADC Alternate bit polarity.
 #define XSP3M2_ADC_CONT_SERDES_MASK		0x0FF00000	//!< Mask of all x3m2 serdes bits
+#define XSP3M2_ADC_CONT_USER_TERM(x) ((((x)&3)<<28)|(((x)&0xC)<<(8-2)))	//!< Enable 50 ohm termination on User Inputs 0 and 1, Extra 2 bit in 9:8 for X3M mk2
  		
 #define XSP3M_ADC_CONT_GET_USER_NOE(x)	(((x)>>12)&0xF)	//!< Output Disable for full strength output drive, leave 50 ohm terminated drivers enables
-#define XSP3M_ADC_CONT_GET_USER_TERM(x) ((((x)>>28)&3)|(((x)>>8)&0xC))	//!< Enable 50 ohm termination on User Inputs 0 and 1
+#define XSP3M2_ADC_CONT_GET_USER_TERM(x) ((((x)>>28)&3)|(((x)>>6)&0xC))	//!< Enable 50 ohm termination on User Inputs 0 and 1 and 2 and 3
+//Bits 31:30 as mk1
 
-
-#define XSP3M_ADC_CONT_IGNORE_OVER_TEMP	(1<<30)		//!< Ignore over temperature shutdown of ADCs
-#define XSP3M_ADC_CONT_PSU_ENB		(1<<31)			//!< PSU Enable	Enable PSU to ADC board.
 //! [XSP3M_ADC_CONTROL_CODE]
 
 /**
