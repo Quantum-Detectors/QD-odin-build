@@ -23,27 +23,17 @@ sudo dnf config-manager --set-enabled crb
 sudo yum -y install cmake
 sudo yum -y install blosc-devel boost-devel zeromq-devel libpcap-devel hdf5-devel
 
-# Install Log4cxx manually as we have no log4cxx-devel package in CentOS Stream 9
-tmp_log4cxx_dir=/tmp/log4cxx
-mkdir -p $tmp_log4cxx_dir
-cd $tmp_log4cxx_dir
-sudo yum -y install wget apr-devel apr-util-devel
-wget https://dlcdn.apache.org/logging/log4cxx/1.2.0/apache-log4cxx-1.2.0.tar.gz
-tar -xvzf apache-log4cxx-1.2.0.tar.gz
-cd $tmp_log4cxx_dir/apache-log4cxx-1.2.0
-mkdir build
-cd $tmp_log4cxx_dir/apache-log4cxx-1.2.0/build
-cmake .. && make -j 8 && sudo make install
-rm -rf $tmp_log4cxx_dir
+# Install Log4cxx (now available on CentOS Stream 9)
+sudo yum -y install log4cxx-devel
 
 # EPICS dependencies
 sudo yum -y install perl rpcgen libtirpc-devel re2c libX11-devel libXtst-devel libxml2-devel libXt-devel libXmu-devel motif-devel giflib-devel
 
 # EDM fonts including substitutions for arial
-sudo yum install xorg-x11-fonts* liberation-fonts
+sudo yum -y install xorg-x11-fonts* liberation-fonts liberation-narrow-fonts
 
 # procServ
 sudo yum -y install procServ telnet
 
 # Other tools
-sudo yum -y install procps
+sudo yum -y install procps numactl

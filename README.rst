@@ -5,77 +5,60 @@ This repository contains build files used to build the Odin software components
 for Xspress readout systems.
 
 
-Docker image
-============
+Repository layout
+=================
 
-The Dockerfile in the root of this repository builds a CentOS Stream 9 image with
-the packages needed to build the Odin software components.
+This repository contains the following components:
 
-To build the Docker image:
-
-.. code:: bash
-
-    docker build -t odin-build:latest .
-
-Or without using cache:
-
-.. code:: bash
-
-    docker build --no-cache -t odin-build:latest .
-
-
-The container can be launched using the following command (leave out `--rm`
-if you do not wish to delete the container when you exit its shell):
-
-.. code:: bash
-
-    docker run -it -p 8888:8888 --rm odin-build:latest
-
-
-You can also launch it with this directory mounted.
-
-Linux:
-
-.. code:: bash
-
-    docker run -it --rm -p=8888:8888 --volume=./:/qd-odin-build odin-build:latest
-
-Windows:
-
-.. code:: bash
-
-    docker run -it --rm -p 8888:8888 -v $PWD/:/qd-odin-build odin-build:latest
-
-.. note::
-
-    The Python control server hosts a basic static web GUI on port 8888
+- adodin-config: Configuration files for ADOdin EPICS module
+- edm-config: EDM configuration files
+- epics-config: General EPICS configuration files
+- odin-config: Odin runtime configuration files
+- python: Python module for testing and using ADOdin
+- scripts: Build scripts for Odin and EPICS
+- server: Utility scripts for deploying onto a server
 
 
 Build scripts
 =============
 
-Scripts from the `scripts/` directory are copied into the Docker container when
-built.
+These are in the `scripts/` directory and are used to build all of the software
+components required for Odin and related software.
 
 - `scripts/epics_build.sh` - builds EPICS base and related modules and
-  applications for Odin
+  applications
 - `scripts/odin_build.sh` - builds the core Odin binaries, Xspress Odin adapter
-  and Python modules into a venv
+  and Python modules into a venv. This support optional arguments to build only
+  certain components (useful for development). Use `-h` to see the options.
+
+These scripts have optional arguments. Run them with `-h` to view the options
+available - this includes building or rebuilding a subset of the components.
+
+Note: these are also copied into the Docker image when built (see Docker image
+section for more info).
 
 
 Server scripts
 ==============
 
-Scripts in the `server/` directory can be run from the root of this repository.
-They are for running on Xspress servers to install dependencies and copy the
-configuration from this repository to the /odin directory.
+These are located in the `server/` directory. These are run to set up the
+root installation path and provide the build scripts and runtime configuration
+for the target system.
+
+The install path is hard-coded to `/odin` and is set to be owned by `xspress3`.
 
 The following scripts are available:
 
-- `server/copy_config.sh` - copies the scripts and configuration from this repo
-  to the same directories as done in the Dockerfile. Should be run after
-  `dependencies.sh`
-- `server/dependencies.sh` - installs all Odin, EPICS and Xspress dependencies
+- `server/copy_build_config.sh` - sets up the install path, copies the build
+  scripts and Xspress binaries, and some static configuration files used for
+  EPICS and EDM.
+- `server/copy_odin_config.sh` - copies the Odin runtime configuration files
+  matching the target system. Run with `-h` to see the available arguments.
+- `server/dependencies.sh` - installs the dependencies required to build and
+  run the Odin and related software
+
+Note: the `dependencies` script should be run before trying to build the
+software
 
 
 Xspress binaries
@@ -83,15 +66,9 @@ Xspress binaries
 
 This repository includes the Xspress binaries and headers required to build the
 Xspress detector Odin adapter. This is because these aren't publically available
-to download.
+to download but are required by Odin to communicate with the Xspress system.
 
-This folder should be copied to the following location (if not using Docker):
-
-.. code::
-
-    /odin/xspress
-
-The Docker image has the xspress folder copied to `/odin/xspress` when built.
+The `copy_build_config` script copies these binaries to `/odin/xspress`.
 
 
 Setting up a new server
@@ -99,15 +76,20 @@ Setting up a new server
 
 The following steps can be used to install Odin software on a new server:
 
-1. Clone this repository (or copy the contents) somewhere on the server
-2. Run `./server/dependencies.sh` to install package dependencies
-3. Run `sudo ./server/copy_build_config.sh` to create the Odin directories and
-   the build configuration files
-4. Run `./server/copy_odin_config.sh` to copy the runtime configuration files
-5. Run `./odin/odin_build.sh` to build Odin and related packages
-6. Run `./odin/epics_build.sh` to build EPICS base, support modules and ADOdin
-7. Copy the bashrc file `./server/.bashrc_odin` to home (`~/`)
-8. Add `~/.bashrc_odin` to the base bashrc file (e.g. `~/.bashrc`) - see below
+1. Copy or clone this repository to the target server.
+2. Run `./server/dependencies.sh` to install all dependencies
+3. Run `./server/copy_build_config.sh` to set up the build
+4. Run `./odin/odin_build.sh` to build Odin components
+5. Run `./odin/epics_build.sh` to build the EPICS components
+6. Run `./server/copy_odin_config.sh` with the correct arguments to set up the
+   Odin runtime config - run with `-h` for more info.
+7. Copy `./server/.bashrc_odin` to the home directory for `xspress3`
+8. Source the `~/.bashrc_odin` file from `~/.bashrc` so that the Odin
+   environment is set up automatically. See below for an example entry
+   in `~/.bashrc`.
+
+We can source the `~/.bashrc_odin` file using the following snippet in
+the `~/.bashrc` file:
 
 .. code:: bash
 
@@ -121,8 +103,8 @@ Launching Odin
 ==============
 
 Launching the procServ processes can be done by running the 
-`./server/launch_8chan_odin.sh` script. This is only compatible with an 8
-channel system.
+`./server/launch_<N>chan_odin.sh` script. Here `<N>` will be replaced by the
+number of channels you configured Odin with using the `copy_odin_config` script.
 
 The procServ processes should then start and appear in `ps`:
 
@@ -173,22 +155,71 @@ The EDM GUI is launched using the following script:
     /odin/epics/support/ADOdin/iocs/xspress/bin/linux-x86_64/stxspress-gui
 
 
-Plotting data
-=============
+Python test module
+==================
 
-There is an example Python script in `./python` which can be used to plot
-output data from Odin.
+There is a python module at `python/src/pyxspress` which can be used to test
+some basic functionality.
 
-You can set up a virtual environment with the dependencies required:
+When installed the following entry points are available:
+
+- `xspress-acquire`: basic MCA acquisition using ADOdin with file saving
+- `xspress-plot`: basic MCA plotting of saved HDF5 data
+- `xspress-view`: GUI application to browse MCA HDF5 data
+- `xspress-list-mode-listener`: can listen to X3X2 list mode TCP endpoints
+  and save the binary data directly to disk.
+- `xspress-list-mode-decode`: used to decode the saved list mode binary data
+  and can either plot decoded time frames or save the data to a simpler HDF5
+  format.
+
+You can use `pipenv` to create the Python virtual environment. Make sure you
+are in the `./python` folder of this repository before running!
+
+For example, setting up the environment and launching an entry point:
 
 .. code:: bash
 
-    python -m venv test_venv
-    source test_venv/bin/activate
-    pip install -r python/requirements.txt
+    ben@alyx qd-odin-build/python $ pipenv install --dev
+    ben@alyx qd-odin-build/python $ pipenv run xspress-view
+
+.. note::
+
+    For plotting you will also need Qt for the Matplotlib GUI. The current
+    version uses Qt5. This can be installed using your standard package
+    manager.
 
 
-You can then run it as a script or module, shown below with the help argument
+Acquisition script
+##################
+
+You can use the `-h` help argument to see what options are available:
+
+.. code:: bash
+
+    ben@Alyx qd-odin-build/python $ pipenv run xspress-acquire -h
+    Usage: xspress-acquire [OPTIONS]
+
+    Run a basic internally-triggered acquisition and optionally save the data.
+
+    Options:
+    -i, --images INTEGER      Number of images  [default: 10]
+    -t, --acquire_time FLOAT  Acquisition time per frame in seconds  [default:
+                                0.1]
+    -fd, --file_dir TEXT      File directory  [default: /data/odin-testing]
+    -fn, --file_name TEXT     File name
+    -pl, --plot               Enable plotting of some data
+    -pa, --plot_all           Plot every image (caps out at 10 plots to avoid
+                                sluggishness)
+    -h, --help                Show this message and exit.
+
+
+This will provide a plot or several plots showing the captured data.
+
+
+Plotting script
+###############
+
+You can then run this as a script or module, shown below with the help argument
 to print the list of options:
 
 .. code:: bash
@@ -197,47 +228,79 @@ to print the list of options:
     python -m python.plot_data --help
 
 
-An example dummy file is included at `python/example_A_file.h5`. This can be
-used as a test to make sure the application is working:
+An example dummy file is included at `python/testing/example_A_file.h5`. This
+can be used as a test to make sure the application is working:
 
 .. code:: bash
 
-    (test_venv) ben@Alyx ~/qd-odin-build $ python python/plot_data.py python/example_A_file.h5 2 -af
-    Reading dataset mca_2 from python/example_A_file.h5
+    ben@Alyx qd-odin-build/python $ pipenv run xspress-plot ./testing/example_A_file.h5
+    Reading dataset mca_0 from ./example_A_file.h5
     Available datasets: ['data', 'mca_0', 'mca_1', 'mca_2', 'mca_3']
     Got data of shape: (10, 1, 4096)
-    Plotting all frames
-    Frame 0 index of maximum: 1985
-    Frame 1 index of maximum: 1985
-    Frame 2 index of maximum: 1985
-    Frame 3 index of maximum: 1985
-    Frame 4 index of maximum: 1985
-    Frame 5 index of maximum: 1985
-    Frame 6 index of maximum: 1985
-    Frame 7 index of maximum: 1985
-    Frame 8 index of maximum: 1985
-    Frame 9 index of maximum: 1985
+    Plotting first frame only
+    Index of maximum: 1985
 
 
 .. note::
-
-    You first need to decompress any compressed Odin data files as it cannot
-    currently read from compressed datasets.
-
-    First make sure you have the Diamond HDF5 filters on your path. This only
-    needs to be done if the `.bashrc_odin` file is not already loaded by your
-    top-level bashrc file (the following example is based on using the install
-    scripts in this repo):
+    If you have the Diamond HDF5 filters on your PATH then you can read the
+    compressed data directly in the Python script. On Xspress servers this
+    should be added by the `.bashrc_odin` bashrc file automatically:
 
     .. code:: bash
 
         export HDF5_PLUGIN_PATH=/odin/prefix/h5plugin
 
-    Now we can decompress the datasets from `compressed.h5` into a new file
-    `bloated.h5`:
+    Otherwise you will need to decompress the data before transferring it to
+    another PC on a server with the filters installed. We can then decompress
+    the datasets from `compressed.h5` into a new file `bloated.h5` using
+    `h5repack`:
 
     .. code:: bash
 
         h5repack -f NONE compressed.h5 bloated.h5
 
-    The python script can then be used
+
+Docker image
+============
+
+The Dockerfile in the root of this repository builds a CentOS Stream 9 image with
+the packages needed to build the Odin software components.
+
+To build the Docker image:
+
+.. code:: bash
+
+    docker build -t odin-build:latest .
+
+Or without using cache:
+
+.. code:: bash
+
+    docker build --no-cache -t odin-build:latest .
+
+
+The container can be launched using the following command (leave out `--rm`
+if you do not wish to delete the container when you exit its shell):
+
+.. code:: bash
+
+    docker run -it -p 8888:8888 --rm odin-build:latest
+
+
+You can also launch it with this directory mounted.
+
+Linux:
+
+.. code:: bash
+
+    docker run -it --rm -p=8888:8888 --volume=./:/qd-odin-build odin-build:latest
+
+Windows:
+
+.. code:: bash
+
+    docker run -it --rm -p 8888:8888 -v $PWD/:/qd-odin-build odin-build:latest
+
+.. note::
+
+    The Python control server hosts a basic static web GUI on port 8888

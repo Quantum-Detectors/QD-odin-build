@@ -14,6 +14,116 @@ GREEN="\033[1;32m"
 RED="\033[0;31m"
 NOCOL="\033[0m"
 
+
+# ============================================================
+# Parse user args
+# ============================================================
+
+build_odin_data=false
+build_xspress_detector=false
+build_hdf5_filters=false
+build_python_env=false
+
+# Check at least one thing was chosen
+build_any=false
+
+options=":adxfph"
+
+while getopts ${options} flag
+do
+    case ${flag} in
+        a)
+            build_odin_data=true
+            build_xspress_detector=true
+            build_hdf5_filters=true
+            build_python_env=true
+            build_any=true
+            ;;
+        d)
+            build_odin_data=true
+            build_any=true
+            ;;
+        x)
+            build_xspress_detector=true
+            build_any=true
+            ;;
+        f)
+            build_hdf5_filters=true
+            build_any=true
+            ;;
+        p)
+            build_python_env=true
+            build_any=true
+            ;;
+        h)
+            echo ""
+            echo -e "${CYAN}=======================================================${NOCOL}"
+            echo "Odin build script"
+            echo -e "${CYAN}=======================================================${NOCOL}"
+            echo ""
+            echo "This script downloads the Odin software components and builds them"
+            echo "into The Odin prefix directory. Existing software will be replaced"
+            echo "if chosen to be rebuilt."
+            echo ""
+            echo "Note: if rebuilding Odin data then Xspress detector may also need"
+            echo "to be rebuilt."
+            echo ""
+            echo "Choose from the following options:"
+            echo ""
+            echo "    -a : build all components"
+            echo "    -d : build Odin data"
+            echo "    -x : build Xspress detector"
+            echo "    -f : build Diamond HDF5 filters"
+            echo "    -p : build the Python environment and Odin Python components"
+            echo "    -h : print this help message and exit."
+            echo ""
+            echo -e "${CYAN}=======================================================${NOCOL}"
+            echo ""
+            exit 0
+            ;;
+        ?)
+            echo "ERROR: Invalid option '${OPTARG}'. Type -h for help"
+            exit 1
+            ;; 
+    esac
+done
+
+if [[ $build_any == false ]]
+then
+    echo "ERROR: No build options selected. Type -h for help"
+    exit 1
+fi
+
+echo -e "${CYAN}=======================================================${NOCOL}"
+echo "Selected components"
+echo -e "${CYAN}=======================================================${NOCOL}"
+if [[ $build_odin_data == true ]]
+then
+    echo -e " - Odin data: ${GREEN}$build_odin_data${NOCOL}"
+else
+    echo -e " - Odin data: $build_odin_data"
+fi
+if [[ $build_xspress_detector == true ]]
+then
+    echo -e " - Xspress detector: ${GREEN}$build_xspress_detector${NOCOL}"
+else
+    echo -e " - Xspress detector: $build_xspress_detector"
+fi
+if [[ $build_hdf5_filters == true ]]
+then
+    echo -e " - Diamond HDF5 filters: ${GREEN}$build_hdf5_filters${NOCOL}"
+else
+    echo -e " - Diamond HDF5 filters: $build_hdf5_filters"
+fi
+if [[ $build_python_env == true ]]
+then
+    echo -e " - Python components: ${GREEN}$build_python_env${NOCOL}"
+else
+    echo -e " - Python components: $build_python_env"
+fi
+echo -e "${CYAN}=======================================================${NOCOL}"
+
+
 # ============================================================
 # Directory setup
 # ============================================================
@@ -22,10 +132,7 @@ NOCOL="\033[0m"
 root_dir=/odin
 prefix_dir=$root_dir/prefix
 
-echo -e "${RED}TARGET DIR: $prefix_dir${NOCOL}"
-
-# Make sure target is clean
-rm -rf $prefix_dir
+echo -e "${GREEN}TARGET INSTALL DIR: $prefix_dir${NOCOL}"
 
 # Xspress binaries root directory
 xspress_name=xspress
@@ -42,59 +149,80 @@ xspress_lib=$xspress_lib_dir/$xspress_lib_name
 imgmod_lib=$xspress_lib_dir/$imgmod_lib_name
 
 # Create Xspress symbolic links for names needed for Odin runtime
-ln -s $xspress_lib $xspress_lib_dir/libxspress3.so.1.0
-ln -s $imgmod_lib $xspress_lib_dir/libimg_mod.so.1.0
+ln -s $xspress_lib $xspress_lib_dir/libxspress3.so.1.0 2>/dev/null
+ln -s $imgmod_lib $xspress_lib_dir/libimg_mod.so.1.0 2>/dev/null
+
 
 # ============================================================
 # Odin data
 # ============================================================
 
-echo -e "${CYAN}BUILDING ODIN DATA${NOCOL}"
-
-# Make sure checkout directory is clean
-cd $root_dir
+# Still available for other components that need the paths
 odin_data_name="odin-data"
 odin_data_cpp_dir=$root_dir/$odin_data_name/cpp
 odin_data_py_dir=$root_dir/$odin_data_name/python
-rm -rf $root_dir/$odin_data_name
 
-git clone https://github.com/odin-detector/odin-data.git $odin_data_name
+if [[ $build_odin_data == true ]]
+then
 
-# Build and install Odin data
-cd $odin_data_cpp_dir
-mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir ..
-make -j 16 VERBOSE=1
-make install
+    echo -e "${CYAN}BUILDING ODIN DATA${NOCOL}"
 
-echo -e "${GREEN}ODIN DATA COMPLETE${NOCOL}\n"
+    # Make sure directory is clean
+    cd $root_dir
+    rm -rf $root_dir/$odin_data_name
 
+    git clone https://github.com/odin-detector/odin-data.git $odin_data_name
+
+    # Build and install Odin data
+    cd $odin_data_cpp_dir
+    # Checkout specific commit as December 2024 changes break compatibility with Xspress detector
+    git checkout b157ac3ecf775522db316263eda07c2bdb46c5d2
+    mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir ..
+    make -j 16 VERBOSE=1
+    make install
+
+    echo -e "${GREEN}ODIN DATA COMPLETE${NOCOL}\n"
+
+fi
 
 # ============================================================
 # Xspress detector
 # ============================================================
 
-echo -e "${CYAN}BUILDING ODIN XSPRESS DETECTOR${NOCOL}"
-
-# Make sure checkout directory is clean
-cd $root_dir
+# Still available for other components that need the paths
 xspress_det_name="xspress-detector"
-xspress_det_cpp_dir=$root_dir/$xspress_det_name/cpp
-xspress_det_py_dir=$root_dir/$xspress_det_name/python
-rm -rf $root_dir/$xspress_det_name
+xspress_det_dir=$root_dir/$xspress_det_name
+xspress_det_cpp_dir=$xspress_det_dir/cpp
+xspress_det_py_dir=$xspress_det_dir/python
 
-git clone https://github.com/Quantum-Detectors/xspress-detector.git $xspress_det_name
+if [[ $build_xspress_detector == true ]]
+then
 
-# Build and install Xspress detector
-cd $xspress_det_cpp_dir
-# TODO: remove when feature/qd-build is merged into qd-main
-git checkout feature/qd-build
-mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir -DODINDATA_ROOT_DIR=$prefix_dir -DLIBXSPRESS_INCLUDE_DIR=$xspress_inc_dir -DLIBXSPRESS_LIBRARY=$xspress_lib -DIMGMOD_LIBRARY=$imgmod_lib ..
-make -j 16 VERBOSE=1
-make install
+    echo -e "${CYAN}BUILDING ODIN XSPRESS DETECTOR${NOCOL}"
 
-echo -e "${GREEN}ODIN XSPRESS DETECTOR COMPLETE${NOCOL}\n"
+    # Make sure directory is clean
+    cd $root_dir
+    rm -rf $xspress_det_dir
+
+    git clone https://github.com/Quantum-Detectors/xspress-detector.git $xspress_det_dir
+
+    # Get release using git
+    # NOTE: this is because git describe is used to set version macros which determine
+    # the version Odin reported by the C++ controller
+    cd $xspress_det_dir
+    git checkout 0.5.0+qd0.1
+
+    # Build and install Xspress detector
+    cd $xspress_det_cpp_dir
+    mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir -DODINDATA_ROOT_DIR=$prefix_dir -DLIBXSPRESS_INCLUDE_DIR=$xspress_inc_dir -DLIBXSPRESS_LIBRARY=$xspress_lib -DIMGMOD_LIBRARY=$imgmod_lib ..
+    make -j 16 VERBOSE=1
+    make install
+
+    echo -e "${GREEN}ODIN XSPRESS DETECTOR COMPLETE${NOCOL}\n"
+
+fi
 
 
 # ============================================================
@@ -117,24 +245,40 @@ echo -e "${GREEN}ODIN XSPRESS DETECTOR COMPLETE${NOCOL}\n"
 # - h5repack -f data:NONE compressed.h5 bloated.h5
 #
 
-echo -e "${CYAN}BUILDING DIAMOND HDF5 FILTERS${NOCOL}"
-
-# Make sure checkout directory is clean
-cd $root_dir
+# Still available for other components that need the paths
 hdf5_filters="hdf5filters"
 hdf5_filters_dir=$root_dir/$hdf5_filters
-rm -rf $hdf5_filters_dir
 
-git clone https://github.com/DiamondLightSource/hdf5filters.git $hdf5_filters_dir
+if [[ $build_hdf5_filters == true ]]
+then
 
-# Build and install HDF5 filters
-cd $hdf5_filters_dir
-mkdir cmake-build && cd cmake-build
-cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir -DCMAKE_BUILD_TYPE=RELEASE -DUSE_AVX2=ON ..
-make
-make install
+    echo -e "${CYAN}BUILDING DIAMOND HDF5 FILTERS${NOCOL}"
 
-echo -e "${GREEN}DIAMOND HDF5 FILTERS COMPLETE${NOCOL}\n"
+    hdf5_filters_tar=$hdf5_filters.tar.gz
+
+    # Make sure directory is clean
+    cd $root_dir
+    rm -rf $hdf5_filters_dir
+    rm -f $hdf5_filters_tar
+
+    # Get release
+    wget https://github.com/DiamondLightSource/hdf5filters/archive/refs/tags/0-6-1.tar.gz -O $hdf5_filters_tar
+
+    # Extract
+    mkdir $hdf5_filters_dir
+    tar -xzf $hdf5_filters_tar -C $hdf5_filters_dir --strip-components=1
+    rm -f $hdf5_filters_tar
+
+    # Build and install HDF5 filters
+    cd $hdf5_filters_dir
+    mkdir cmake-build && cd cmake-build
+    cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir -DCMAKE_BUILD_TYPE=RELEASE -DUSE_AVX2=ON ..
+    make
+    make install
+
+    echo -e "${GREEN}DIAMOND HDF5 FILTERS COMPLETE${NOCOL}\n"
+
+fi
 
 
 # ============================================================
@@ -147,22 +291,30 @@ echo -e "${GREEN}DIAMOND HDF5 FILTERS COMPLETE${NOCOL}\n"
 # - Xspress control
 #
 
-echo -e "${CYAN}BUILDING ODIN PYTHON ENVIRONMENT${NOCOL}"
-
-# Virtual environment location
+# Still available for other components that need the paths
 py_venv=$root_dir/python
 
-# Create environment
-python3.11 -m venv $py_venv
-source $py_venv/bin/activate
-pip install --upgrade pip
+if [[ $build_python_env == true ]]
+then
 
-# Install dependencies
-pip install "odin-control @ git+https://git@github.com/odin-detector/odin-control.git"
-pip install $odin_data_py_dir
-pip install $xspress_det_py_dir
-pip install "odinprocservcontrol @ git+https://git@github.com/DiamondLightSource/odinprocservcontrol.git"
+    echo -e "${CYAN}BUILDING ODIN PYTHON ENVIRONMENT${NOCOL}"
 
-deactivate
+    # Clean current virtual environment
+    rm -rf $py_venv
 
-echo -e "${GREEN}PYTHON ENVIRONMENT COMPLETE${NOCOL}\n"
+    # Create environment
+    python3.11 -m venv $py_venv
+    source $py_venv/bin/activate
+    pip install --upgrade pip
+
+    # Install dependencies
+    pip install "odin-control @ git+https://git@github.com/odin-detector/odin-control.git@1.6.0"
+    pip install $odin_data_py_dir
+    pip install $xspress_det_py_dir
+    pip install "odinprocservcontrol @ git+https://git@github.com/DiamondLightSource/odinprocservcontrol.git@c37d08552b012efc3acacfeb892ba8e292467a6f"
+
+    deactivate
+
+    echo -e "${GREEN}PYTHON ENVIRONMENT COMPLETE${NOCOL}\n"
+
+fi

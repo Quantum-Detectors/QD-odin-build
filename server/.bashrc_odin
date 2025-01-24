@@ -22,3 +22,12 @@ export EPICS_CA_REPEATER_PORT=6065
 
 # HDF5 filters
 export HDF5_PLUGIN_PATH=/odin/prefix/h5plugin
+
+# Fonts for EDM when connecting remotely from NoMachine
+if [[ $DISPLAY ]]
+then
+	xset +fp /usr/share/fonts/liberation-mono/
+	xset +fp /usr/share/fonts/liberation-narrow/
+	xset +fp /usr/share/fonts/liberation-sans/
+	xset +fp /usr/share/fonts/liberation-serif/
+fi
