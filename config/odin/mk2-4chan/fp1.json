@@ -19,8 +19,8 @@
         "plugin": {
             "load": {
                 "index": "xspress-list",
-                "name": "XspressListModeProcessPlugin",
-                "library": "/odin/prefix/lib/libXspressListModeProcessPlugin.so"
+                "name": "X3X2ListModeProcessPlugin",
+                "library": "/odin/prefix/lib/libX3X2ListModeProcessPlugin.so"
             }
         }
     },
@@ -353,8 +353,7 @@
                 },
                 {
                     "xspress-list": {
-                        "channels": [0, 1, 2
-                        ],
+                        "channels": [0, 1],
                         "frame_size": 4194304
                     }
                 },
@@ -369,19 +368,13 @@
                             "raw_0": {
                                 "datatype": "uint64",
                                 "chunks": [
-                                    524288
+                                    524280
                                 ]
                             },
                             "raw_1": {
                                 "datatype": "uint64",
                                 "chunks": [
-                                    524288
-                                ]
-                            },
-                            "raw_2": {
-                                "datatype": "uint64",
-                                "chunks": [
-                                    524288
+                                    524280
                                 ]
                             }
                         }

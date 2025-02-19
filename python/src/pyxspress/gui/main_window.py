@@ -4,6 +4,7 @@ Main window
 The main window of the application
 """
 
+import glob
 import os
 from typing import Dict, List, Optional
 
@@ -25,7 +26,7 @@ from PySide6.QtWidgets import (
 )
 
 from pyxspress import __version__
-from pyxspress.data import XspressFileReader
+from pyxspress.data import FileReaderInterface, get_file_reader
 from pyxspress.gui import LineChartWidget
 from pyxspress.gui.util import get_image_path
 from pyxspress.util import Loggable
@@ -57,7 +58,7 @@ class MainWindow(QMainWindow, Loggable):
         """Create the main window"""
         super().__init__()
 
-        self.file_reader = XspressFileReader()
+        self.file_reader: FileReaderInterface
         self.chart_widgets: Dict[int, LineChartWidget] = {}
         self.default_file_path_text = "Select Xspress HDF5 file..."
         self.last_success_file_path_text = ""
@@ -361,13 +362,16 @@ class MainWindow(QMainWindow, Loggable):
         file_name = QFileDialog().getOpenFileName(
             filter="Xspress HDF5 file (*.h5);; All files (*.*)"
         )[0]
-        self.__open_xspress_file(file_name)
+        if len(file_name) > 0:
+            self.logger.info(f"Opening {file_name}")
+            self.__open_xspress_file(file_name)
 
     def __manual_file_path_callback(self):
         """Callback from manually editing the file path to open"""
         text = self.file_path_line_edit.text()
         if text != self.default_file_path_text and len(text) > 0:
-            self.__open_xspress_file(self.file_path_line_edit.text())
+            self.logger.info(f"Opening {text}")
+            self.__open_xspress_file(text)
 
     def __open_xspress_file(self, file_name: str):
         """Open the Xspress HDF5 file(s)
@@ -378,37 +382,31 @@ class MainWindow(QMainWindow, Loggable):
         Args:
             file_name (str): File name of Xspress HDF5 file
         """
-        # Find the companion HDF5 file if it exists
-        if "_A_000000.h5" in file_name:
-            a_file = file_name
-            b_file = file_name.replace("_A_000000.h5", "_B_000000.h5")
-        elif "_B_000000.h5" in file_name:
-            a_file = file_name.replace("_B_000000.h5", "_A_000000.h5")
-            b_file = file_name
+        # Create our file reader
+        self.file_reader = get_file_reader(file_name)
+
+        # Get companion HDF5 files if we have pattern
+        suffix_pattern = "_000000.h5"
+        meta_file: Optional[str] = None
+        if suffix_pattern in file_name:
+            # Channel files
+            file_prefix = file_name.split(suffix_pattern)[0][:-1]
+            file_pattern = f"{file_prefix}*{suffix_pattern}"
+            self.logger.info(f"Looking for files matching pattern: {file_pattern}")
+            file_list = sorted(glob.glob(file_pattern))
+            self.logger.info(f"Found files: {file_list}")
+            assert len(file_list) > 0, "Did not find matching files"
+
+            # Metadata file
+            meta_file_name = f"{file_prefix}meta.h5"
+            if os.path.exists(meta_file_name):
+                self.logger.info(f"Found metadata file: {meta_file_name}")
+                meta_file = meta_file_name
+
         else:
-            a_file = file_name
-            b_file = None
+            file_list = [file_name]
 
-        if not os.path.exists(a_file):
-            self.logger.error(f"Could not find file: '{a_file}'. Does it exist?")
-
-        if b_file and not os.path.exists(b_file):
-            self.logger.warning(f"Could not find secondary file: '{b_file}'. Skipping.")
-            b_file = None
-
-        # Find the meta file
-        meta_file: Optional[str]
-        if "_A_000000.h5" in a_file:
-            meta_file = a_file.replace("_A_000000.h5", "_meta.h5")
-            if not os.path.exists(meta_file):
-                self.logger.info("No meta file found")
-                meta_file = None
-        else:
-            meta_file = None
-
-        self.logger.debug(f"Parsing file(s):\n - {a_file}\n - {b_file}\n - {meta_file}")
-
-        if self.file_reader.open_files(a_file, b_file, meta_file):
+        if self.file_reader.open_files(file_list, meta_file):
             self.total_frames_in_file.setText(f" / {self.file_reader.num_frames}")
             self.num_channels.setText(f"{self.file_reader.num_channels}")
 
@@ -561,6 +559,11 @@ class MainWindow(QMainWindow, Loggable):
         Args:
             frame_number (int): Frame number to display
         """
+        # Check we have some enabled channels
+        if len(self.enabled_channels) == 0:
+            self.logger.warning("No channels enabled")
+            return
+
         self.logger.debug(f"Showing frame {frame_number}")
 
         if self.combined_plot_checkbox.checkState() is Qt.CheckState.Checked:
@@ -593,10 +596,12 @@ class MainWindow(QMainWindow, Loggable):
         channel_index = 0
         for _ in self.enabled_channels:
             for scalar_num in range(len(xspress_scalers)):
-                widget = self.scalar_box_layout.itemAtPosition(
+                item = self.scalar_box_layout.itemAtPosition(
                     scalar_num + 1, channel_index + 1
-                ).widget()
-                assert isinstance(widget, QLabel)
-                widget.setText(f"{scalar_data[channel_index, scalar_num]}")
+                )
+                if item:
+                    widget = item.widget()
+                    assert isinstance(widget, QLabel)
+                    widget.setText(f"{scalar_data[channel_index, scalar_num]}")
 
             channel_index += 1

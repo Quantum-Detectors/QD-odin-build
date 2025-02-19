@@ -28,14 +28,14 @@ sudo chgrp xspress3 /odin
 
 # EPICS configuration files
 mkdir -p /odin/epics/config
-cp $root_dir/epics-config/synapp_modules /odin/epics/config
-cp $root_dir/epics-config/RELEASE.local /odin/epics/config
-cp $root_dir/epics-config/xspress_IOC_RELEASE /odin/epics/config
+cp $root_dir/config/epics/synapp_modules /odin/epics/config
+cp $root_dir/config/epics/RELEASE.local /odin/epics/config
+cp $root_dir/config/epics/xspress_IOC_RELEASE /odin/epics/config
 
 # EDM configuration files
 mkdir -p /odin/epics/edm
-cp $root_dir/edm-config/colors.list /odin/epics/edm
-cp $root_dir/edm-config/fonts.list /odin/epics/edm
+cp $root_dir/config/edm/colors.list /odin/epics/edm
+cp $root_dir/config/edm/fonts.list /odin/epics/edm
 
 # Xspress binaries
 cp -r $root_dir/xspress /odin
