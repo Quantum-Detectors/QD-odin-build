@@ -10,11 +10,15 @@ Repository layout
 
 This repository contains the following components:
 
-- adodin-config: Configuration files for ADOdin EPICS module
-- edm-config: EDM configuration files
-- epics-config: General EPICS configuration files
-- odin-config: Odin runtime configuration files
-- python: Python module for testing and using ADOdin
+- config: configuration files
+
+  - adodin: ADOdin database templates for the IOC to load
+  - edm: runtime configuration for EDM
+  - epics: synapps module versions and configure/RELEASE files for building
+  - odin: runtime configuration for Odin
+
+- python: Python module for generating configuration files and testing and
+  using ADOdin
 - scripts: Build scripts for Odin and EPICS
 - server: Utility scripts for deploying onto a server
 
@@ -165,7 +169,7 @@ When installed the following entry points are available:
 
 - `xspress-acquire`: basic MCA acquisition using ADOdin with file saving
 - `xspress-plot`: basic MCA plotting of saved HDF5 data
-- `xspress-view`: GUI application to browse MCA HDF5 data
+- `xspress-view`: GUI application to browse MCA and list mode data
 - `xspress-list-mode-listener`: can listen to X3X2 list mode TCP endpoints
   and save the binary data directly to disk.
 - `xspress-list-mode-decode`: used to decode the saved list mode binary data

@@ -7,6 +7,32 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+0.3.0
+-----
+
+Added:
+
+- Add support for opening X3X2 list mode files (for corresponding version of
+  xspress-detector) to `xspress-view` GUI application
+- Add build in place support for Odin build scripts for easier building during
+  development
+
+Changed:
+
+- Reorganised configuration folder structure to make it cleaner
+- X3X2 4 channel configuration of frame processors now set for correct channels
+- Updated xspress-detector to 0.5.0+qd0.2
+
+Fixed:
+
+- corrected typos in `stFrameProcessor3.sh` and `stFrameProcessor4.sh` for
+  `mk2-8chan` configuration
+- Add `fr_adapter_name` to frame processor adapter config in `odin_server.cfg`
+  to fix Xspress adapter failing to configure when running in list mode
+- Add `hdf5plugin` dependency to make sure HDF5 plugin path is set properly
+  when running Python GUI applications
+
+
 0.2.0
 -----
 

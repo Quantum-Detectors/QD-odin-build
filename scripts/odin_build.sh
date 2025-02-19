@@ -27,7 +27,10 @@ build_python_env=false
 # Check at least one thing was chosen
 build_any=false
 
-options=":adxfph"
+# Don't delete and re-check out
+build_in_place=false
+
+options=":adxfpih"
 
 while getopts ${options} flag
 do
@@ -55,6 +58,9 @@ do
             build_python_env=true
             build_any=true
             ;;
+        i)
+            build_in_place=true
+            ;;
         h)
             echo ""
             echo -e "${CYAN}=======================================================${NOCOL}"
@@ -75,6 +81,7 @@ do
             echo "    -x : build Xspress detector"
             echo "    -f : build Diamond HDF5 filters"
             echo "    -p : build the Python environment and Odin Python components"
+            echo "    -i : rebuild C++ components in place (without re-fetching release)"
             echo "    -h : print this help message and exit."
             echo ""
             echo -e "${CYAN}=======================================================${NOCOL}"
@@ -121,7 +128,7 @@ then
 else
     echo -e " - Python components: $build_python_env"
 fi
-echo -e "${CYAN}=======================================================${NOCOL}"
+echo -e "${CYAN}=======================================================${NOCOL}\n"
 
 
 # ============================================================
@@ -132,7 +139,8 @@ echo -e "${CYAN}=======================================================${NOCOL}"
 root_dir=/odin
 prefix_dir=$root_dir/prefix
 
-echo -e "${GREEN}TARGET INSTALL DIR: $prefix_dir${NOCOL}"
+echo -e "TARGET INSTALL DIR: ${GREEN}$prefix_dir${NOCOL}"
+echo -e "BUILDING IN PLACE: ${GREEN}$build_in_place${NOCOL}\n"
 
 # Xspress binaries root directory
 xspress_name=xspress
@@ -159,24 +167,31 @@ ln -s $imgmod_lib $xspress_lib_dir/libimg_mod.so.1.0 2>/dev/null
 
 # Still available for other components that need the paths
 odin_data_name="odin-data"
-odin_data_cpp_dir=$root_dir/$odin_data_name/cpp
-odin_data_py_dir=$root_dir/$odin_data_name/python
+odin_data_dir=$root_dir/$odin_data_name
+odin_data_cpp_dir=$odin_data_dir/cpp
+odin_data_py_dir=$odin_data_dir/python
 
 if [[ $build_odin_data == true ]]
 then
 
     echo -e "${CYAN}BUILDING ODIN DATA${NOCOL}"
 
+    if [[ $build_in_place == false ]]
+    then
     # Make sure directory is clean
     cd $root_dir
-    rm -rf $root_dir/$odin_data_name
+    rm -rf $odin_data_dir
 
     git clone https://github.com/odin-detector/odin-data.git $odin_data_name
 
     # Build and install Odin data
-    cd $odin_data_cpp_dir
+    cd $odin_data_dir
     # Checkout specific commit as December 2024 changes break compatibility with Xspress detector
     git checkout b157ac3ecf775522db316263eda07c2bdb46c5d2
+    fi
+
+    cd $odin_data_cpp_dir
+    rm -rf build
     mkdir build && cd build
     cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir ..
     make -j 16 VERBOSE=1
@@ -201,20 +216,25 @@ then
 
     echo -e "${CYAN}BUILDING ODIN XSPRESS DETECTOR${NOCOL}"
 
-    # Make sure directory is clean
-    cd $root_dir
-    rm -rf $xspress_det_dir
+    if [[ $build_in_place == false ]]
+    then
+        # Make sure directory is clean
+        cd $root_dir
+        rm -rf $xspress_det_dir
 
-    git clone https://github.com/Quantum-Detectors/xspress-detector.git $xspress_det_dir
+        git clone https://github.com/Quantum-Detectors/xspress-detector.git $xspress_det_dir
 
-    # Get release using git
-    # NOTE: this is because git describe is used to set version macros which determine
-    # the version Odin reported by the C++ controller
-    cd $xspress_det_dir
-    git checkout 0.5.0+qd0.1
+        # Get release using git
+        # NOTE: this is because git describe is used to set version macros which determine
+        # the version Odin reported by the C++ controller - which is missing if we use
+        # wget.
+        cd $xspress_det_dir
+        git checkout 0.5.0+qd0.2
+    fi
 
     # Build and install Xspress detector
     cd $xspress_det_cpp_dir
+    rm -rf build
     mkdir build && cd build
     cmake -DCMAKE_INSTALL_PREFIX=$prefix_dir -DODINDATA_ROOT_DIR=$prefix_dir -DLIBXSPRESS_INCLUDE_DIR=$xspress_inc_dir -DLIBXSPRESS_LIBRARY=$xspress_lib -DIMGMOD_LIBRARY=$imgmod_lib ..
     make -j 16 VERBOSE=1

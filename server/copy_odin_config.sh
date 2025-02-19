@@ -98,7 +98,7 @@ echo -e "Config dir: ${CYAN}$config_dir${NOCOL}"
 echo ""
 
 # Check the configuration exists for combination of channels and mark
-full_dir="$root_dir/odin-config/$config_dir"
+full_dir="$root_dir/config/odin/$config_dir"
 if [[ ! -d $full_dir ]]
 then
     echo -e "${RED}[ERROR]${NOCOL} Directory $full_dir does not exist for this combination of settings."
@@ -124,7 +124,7 @@ cp -r $full_dir/* /odin/config
 
 # Get the correct source template
 db_sub_source_filename=xspress_expanded_${num_channels}ch.substitutions
-source_adodin_db_file="$root_dir/adodin-config/$db_sub_source_filename"
+source_adodin_db_file="$root_dir/config/adodin/$db_sub_source_filename"
 
 # Copy to EPICS config directory and also ADOdin if it exists
 db_sub_target_filename=xspress_expanded.substitutions
@@ -152,7 +152,7 @@ fi
 
 # Copy any common files
 echo -e "${GREEN}[INFO]${NOCOL} Copying common configuration files"
-common_dir="$root_dir/odin-config/common"
+common_dir="$root_dir/config/odin/common"
 cp -r $common_dir/* /odin/config
 
 echo ""
