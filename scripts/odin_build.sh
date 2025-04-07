@@ -23,6 +23,7 @@ build_odin_data=false
 build_xspress_detector=false
 build_hdf5_filters=false
 build_python_env=false
+build_config_env=false
 
 # Check at least one thing was chosen
 build_any=false
@@ -30,7 +31,7 @@ build_any=false
 # Don't delete and re-check out
 build_in_place=false
 
-options=":adxfpih"
+options=":adxfpich"
 
 while getopts ${options} flag
 do
@@ -41,6 +42,7 @@ do
             build_hdf5_filters=true
             build_python_env=true
             build_any=true
+            build_config_env=true
             ;;
         d)
             build_odin_data=true
@@ -60,6 +62,10 @@ do
             ;;
         i)
             build_in_place=true
+            ;;
+        c)
+            build_config_env=true
+            build_any=true
             ;;
         h)
             echo ""
@@ -82,6 +88,7 @@ do
             echo "    -f : build Diamond HDF5 filters"
             echo "    -p : build the Python environment and Odin Python components"
             echo "    -i : rebuild C++ components in place (without re-fetching release)"
+            echo "    -c : build the configuration enviroment"
             echo "    -h : print this help message and exit."
             echo ""
             echo -e "${CYAN}=======================================================${NOCOL}"
@@ -127,6 +134,12 @@ then
     echo -e " - Python components: ${GREEN}$build_python_env${NOCOL}"
 else
     echo -e " - Python components: $build_python_env"
+fi
+if [[ $build_config_env == true ]]
+then
+    echo -e " - Python config environment: ${GREEN}$build_config_env${NOCOL}"
+else
+    echo -e " - Python config environment: $build_config_env"
 fi
 echo -e "${CYAN}=======================================================${NOCOL}\n"
 
@@ -299,6 +312,51 @@ then
     echo -e "${GREEN}DIAMOND HDF5 FILTERS COMPLETE${NOCOL}\n"
 
 fi
+
+
+# ============================================================
+# Config Python environment
+# ============================================================
+#
+# This creates a virtual environment for the following components:
+# - Odin control
+# - Odin data (Python part)
+# - Xspress control
+#
+
+# Still available for other components that need the paths
+
+
+if [[ $build_config_env == true ]]
+then
+    py_conf_venv="$root_dir/python_conf"
+    conf_wheel="$root_dir/python/conf/"
+    echo -e "${CYAN}BUILDING ODIN PYTHON ENVIRONMENT${NOCOL}"
+
+    # Clean current virtual environment
+    rm -rf $py_conf_venv
+
+    # Create environment
+    python3.11 -m venv $py_conf_venv
+    source $py_conf_venv/bin/activate
+    pip install --upgrade pip
+
+    # Install pyxspress
+    pip install $conf_wheel/*.whl
+
+    if ! grep -q 'export PATH=.*'"$py_conf_venv/bin" ~/.bashrc; then
+        echo "export PATH=\"\$PATH:$py_conf_venv/bin\"" >> ~/.bashrc
+    else
+        echo "$py_conf_venv/bin is already in PATH"
+    fi
+    deactivate
+    source ~/.bashrc
+
+    mkdir -p "/odin/config"
+    echo -e "${GREEN}PYTHON CONFIG ENVIRONMENT COMPLETE${NOCOL}\n"
+
+fi
+
 
 
 # ============================================================

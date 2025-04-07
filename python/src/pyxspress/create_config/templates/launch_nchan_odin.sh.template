@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+# ============================================================
+# Launch {chans} channel Odin processes
+# ============================================================
+
+BASE_PORT=4001
+PROC_SERV_BASE_PORT=9001
+
+# Launch from config folder
+cd /odin/config
+
+# Odin processes
+{odin_processes}
+
+# ProcServControl IOCs
+procServ -P `expr $PROC_SERV_BASE_PORT + 0` /odin/config/stProcServControl.sh
+procServ -P `expr $PROC_SERV_BASE_PORT + 1` /odin/config/stOdinProcServControl.sh
+
+cd -
