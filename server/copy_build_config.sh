@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-
+exec > /dev/null 2>&1
 # ============================================================
 # Copy build config
 # ============================================================
@@ -43,6 +43,27 @@ cp -r $root_dir/xspress /odin
 # Build scripts
 cp $root_dir/scripts/odin_build.sh /odin
 cp $root_dir/scripts/epics_build.sh /odin/epics
+
+# Build config wheel
+module_path=$root_dir/python
+
+rm -rf conf_venv
+
+python3.11 -m venv conf_venv/
+source conf_venv/bin/activate
+pip install --upgrade pip
+pip install build
+
+cd $module_path
+python -m build 
+
+deactivate
+
+cd ..
+rm -rf conf_venv/
+
+sudo mkdir -p /odin/python/conf
+cp $module_path/dist/*.whl /odin/python/conf
 
 # Ownership
 chown -R xspress3 /odin

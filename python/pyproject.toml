@@ -17,6 +17,16 @@ classifiers = [
 ]
 requires-python = ">=3.7"
 dependencies = [
+    "importlib-metadata",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://gitlab.com/qd-xspress3/qd-odin-build"
+
+[project.optional-dependencies]
+# Required for the plotting and GUI
+cli = [
     "click",
     "h5py",
     "hdf5plugin",
@@ -27,12 +37,6 @@ dependencies = [
     "pyqt5",
     "PySide6",
 ]
-dynamic = ["version"]
-
-[project.urls]
-Homepage = "https://gitlab.com/qd-xspress3/qd-odin-build"
-
-[project.optional-dependencies]
 # Required packages for development
 dev = [
     "black",
@@ -60,18 +64,26 @@ xspress-list-mode-listener = "pyxspress.cli.list_mode_listener:main"
 xspress-list-mode-decode = "pyxspress.cli.list_mode_decode:main"
 xspress-plot = "pyxspress.cli.plot_data:main"
 xspress-view = "pyxspress.cli.data_gui:main"
+config-generate = "pyxspress.create_config.create:main"
 
 [tool.setuptools]
 # Use the src directory for the package
 package-dir = {"" = "src"}
 # Required packages to run the main application
 license-files = ["LICENCE.rst"]
-include-package-data = false
+include-package-data = true
 
 [tool.setuptools.packages.find]
 # Find packages in the src directory
 where = ["src"]
 namespaces = false
+
+[tool.setuptools.package-data]
+pyxspress = [
+    "create_config/common/*",
+    "create_config/templates/*",
+    "create_config/files/*"
+]
 
 [tool.setuptools.dynamic]
 version = {file = ["VERSION.txt"]}
