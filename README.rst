@@ -34,6 +34,8 @@ components required for Odin and related software.
 - `scripts/odin_build.sh` - builds the core Odin binaries, Xspress Odin adapter
   and Python modules into a venv. This support optional arguments to build only
   certain components (useful for development). Use `-h` to see the options.
+- `scripts/kill_odin.sh` - kills all processes in Odin setup in the case of a broken configuration.
+
 
 These scripts have optional arguments. Run them with `-h` to view the options
 available - this includes building or rebuilding a subset of the components.
@@ -56,13 +58,20 @@ The following scripts are available:
 - `server/copy_build_config.sh` - sets up the install path, copies the build
   scripts and Xspress binaries, and some static configuration files used for
   EPICS and EDM.
-- `server/copy_odin_config.sh` - copies the Odin runtime configuration files
-  matching the target system. Run with `-h` to see the available arguments.
 - `server/dependencies.sh` - installs the dependencies required to build and
   run the Odin and related software
 
 Note: the `dependencies` script should be run before trying to build the
 software
+
+Generate Config
+===============
+
+Once the copy_build_config and build_odin scripts have been run the `generate-config`
+entry point can be accessed. This has 3 possible arguments:
+- c/channels number of channels in the system. Default 8
+- m/mark the generation of the system (only Mk2 tested currently). Default 2
+- d/dir The directory that the configuration files will be generated to. Default "/odin/config"
 
 
 Xspress binaries
@@ -85,7 +94,7 @@ The following steps can be used to install Odin software on a new server:
 3. Run `./server/copy_build_config.sh` to set up the build
 4. Run `./odin/odin_build.sh` to build Odin components
 5. Run `./odin/epics_build.sh` to build the EPICS components
-6. Run `./server/copy_odin_config.sh` with the correct arguments to set up the
+6. Run `generate-config` with the correct arguments to set up the
    Odin runtime config - run with `-h` for more info.
 7. Copy `./server/.bashrc_odin` to the home directory for `xspress3`
 8. Source the `~/.bashrc_odin` file from `~/.bashrc` so that the Odin
