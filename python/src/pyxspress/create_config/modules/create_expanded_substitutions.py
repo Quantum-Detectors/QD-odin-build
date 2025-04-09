@@ -2,6 +2,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
+
 def _odin_data_template(num_cards):
     od_temp_string = ""
     for i in range(num_cards):
@@ -64,4 +65,3 @@ def xspress_expanded_substitutions(num_cards, num_chans, template_dir):
             subprocess.run(["make"], cwd=adodin_dir, check=True)
         except subprocess.CalledProcessError as e:
             print(f"Make command failed with error {e}")
-   

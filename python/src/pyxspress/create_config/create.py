@@ -11,6 +11,7 @@ from pyxspress.create_config.modules.create_meta_liveView import live_view_file,
 from pyxspress.create_config.modules.create_proc_serv_ioc import proc_serv_ioc
 from pyxspress.create_config.modules.create_server_config import odin_server_config
 from pyxspress.create_config.modules.create_folder import create_config_folder
+from pyxspress.create_config.modules.create_gui import create_gui
 
 
 class ConfigGenerator:
@@ -42,10 +43,10 @@ class ConfigGenerator:
         for func in funcs_some:
             func(self.num_cards, self.template_dir, self.target_dir)
         xspress_expanded_substitutions(self.num_cards, self.num_chans, self.template_dir)
+        create_gui(self.num_cards, self.template_dir)
 
     def folder(self):
-        create_config_folder(self.common_dir, self.target_dir)
-        
+        create_config_folder(self.common_dir, self.target_dir)  
 
 
 def main():
