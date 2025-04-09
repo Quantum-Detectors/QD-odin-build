@@ -67,7 +67,7 @@ software
 Generate Config
 ===============
 
-Once the copy_build_config and build_odin scripts have been run the `generate-config`
+Once the copy_build_config and build_odin scripts have been run the `config-generate`
 entry point can be accessed. This has 3 possible arguments:
 - c/channels number of channels in the system. Default 8
 - m/mark the generation of the system (only Mk2 tested currently). Default 2
@@ -94,7 +94,7 @@ The following steps can be used to install Odin software on a new server:
 3. Run `./server/copy_build_config.sh` to set up the build
 4. Run `./odin/odin_build.sh` to build Odin components
 5. Run `./odin/epics_build.sh` to build the EPICS components
-6. Run `generate-config` with the correct arguments to set up the
+6. Run `config-generate` with the correct arguments to set up the
    Odin runtime config - run with `-h` for more info.
 7. Copy `./server/.bashrc_odin` to the home directory for `xspress3`
 8. Source the `~/.bashrc_odin` file from `~/.bashrc` so that the Odin
