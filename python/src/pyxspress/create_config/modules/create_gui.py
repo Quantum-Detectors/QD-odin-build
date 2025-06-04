@@ -44,17 +44,18 @@ def buttons(processes, template_dir):
     with open(template_dir/"gui_button.template", 'r') as button_file_temp:
         button_string = button_file_temp.read()
     ypos = 40
-    full_process_string += solo_button(button_string, processes[0], 225, ypos)
+    full_process_string += solo_button(button_string, processes[0], 10, ypos)
     for process in processes[1:-1]:
         if (int(process["Process"].split("-")[2]) % 2):
             # Left align odd buttons
             xpos = 225
         else:
             # Right align even buttons
-            xpos = 395
-        ypos += 35
+            xpos = 10
+            ypos += 35
+        
         full_process_string += solo_button(button_string, process, xpos, ypos)
-    full_process_string += solo_button(button_string, processes[-1], 395, 40)
+    full_process_string += solo_button(button_string, processes[-1], 225, 40)
     return full_process_string
 
 
@@ -63,16 +64,17 @@ def solo_button(button_string, process, xpos, ypos):
     process_string = process_string.replace("{name}", process["Name"])
     process_string = process_string.replace("{xpos1}", f"{xpos}")
     process_string = process_string.replace("{xpos2}", f"{xpos + 4}")
+    process_string = process_string.replace("{xpos_but}", f"{xpos + 180}")
     process_string = process_string.replace("{ypos1}", f"{ypos}")
     process_string = process_string.replace("{ypos2}", f"{ypos + 2}")
     return process_string
 
 
 def main_gui(full_process_string, num_cards, template_dir):
-    height = 210 + (num_cards * 35)
+    height = 210 + ((num_cards - 1) * 35)
     button_pos = height - 65
     exit_button_pos = height - 30
-    edl_dir = Path("/odin/epics/support/ADOdin/iocs/xspress/xspresApp/opl/edl")
+    edl_dir = Path("/odin/epics/support/ADOdin/iocs/xspress/xspressApp/opi/edl")
     with open(template_dir/"gui_proc_serv.edl.template", 'r') as proc_file_temp:
         proc_file_string = proc_file_temp.read()
     proc_file_string = proc_file_string.replace("{processes}", full_process_string)

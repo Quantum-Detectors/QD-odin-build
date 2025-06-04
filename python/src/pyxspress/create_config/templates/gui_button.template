@@ -99,7 +99,7 @@ major 4
 minor 0
 release 0
 w 20
-x 395
+x {xpos_but}
 y {ypos1}
 bgColor index 0
 controlPvs {
@@ -123,3 +123,4 @@ numStates 4
 useOriginalColors
 useOriginalSize
 endObjectProperties
+
