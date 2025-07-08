@@ -319,18 +319,14 @@ fi
 # ============================================================
 #
 # This creates a virtual environment for the following components:
-# - Odin control
-# - Odin data (Python part)
-# - Xspress control
-#
-
-# Still available for other components that need the paths
+# - config-generate
+# - acquisition scripts
 
 
 if [[ $build_config_env == true ]]
 then
-    py_conf_venv="$root_dir/python_conf"
-    conf_wheel="$root_dir/python/conf/"
+    py_conf_venv="$root_dir/config/conf_venv"
+    conf_wheel="$root_dir/config/dist"
     echo -e "${CYAN}BUILDING ODIN PYTHON ENVIRONMENT${NOCOL}"
 
     # Clean current virtual environment
@@ -352,9 +348,7 @@ then
     deactivate
     source ~/.bashrc
 
-    mkdir -p "/odin/config"
     echo -e "${GREEN}PYTHON CONFIG ENVIRONMENT COMPLETE${NOCOL}\n"
-
 fi
 
 

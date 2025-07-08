@@ -10,4 +10,3 @@ def create_config_folder(common_dir, target_dir):
         src_path = os.path.join(common_dir, file)
         trgt_path = os.path.join(target_dir, file)
         shutil.copy2(src_path, trgt_path)
-

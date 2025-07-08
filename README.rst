@@ -72,6 +72,7 @@ entry point can be accessed. This has 3 possible arguments:
 - c/channels number of channels in the system. Default 8
 - m/mark the generation of the system (only Mk2 tested currently). Default 2
 - d/dir The directory that the configuration files will be generated to. Default "/odin/config"
+- t/test Makes files in place, useful for developer testing of the module.
 
 
 Xspress binaries
@@ -92,8 +93,8 @@ The following steps can be used to install Odin software on a new server:
 1. Copy or clone this repository to the target server.
 2. Run `./server/dependencies.sh` to install all dependencies
 3. Run `./server/copy_build_config.sh` to set up the build
-4. Run `./odin/odin_build.sh` to build Odin components
-5. Run `./odin/epics_build.sh` to build the EPICS components
+4. Run `/odin/odin_build.sh` to build Odin components
+5. Run `/odin/epics/epics_build.sh` to build the EPICS components
 6. Run `config-generate` with the correct arguments to set up the
    Odin runtime config - run with `-h` for more info.
 7. Copy `./server/.bashrc_odin` to the home directory for `xspress3`
@@ -124,17 +125,18 @@ The procServ processes should then start and appear in `ps`:
 .. code:: bash
 
     [xspress3@xspress3 qd-odin-build]$ ps -ef | grep -i procServ
-    xspress3 3823260       1  0 14:49 ?        00:00:00 procServ -P 4001 /odin/config/stOdinServer.sh
-    xspress3 3823263       1  0 14:49 ?        00:00:00 procServ -P 4002 /odin/config/stFrameReceiver1.sh
-    xspress3 3823266       1  0 14:49 ?        00:00:00 procServ -P 4003 /odin/config/stFrameProcessor1.sh
-    xspress3 3823269       1  0 14:49 ?        00:00:00 procServ -P 4004 /odin/config/stFrameReceiver2.sh
-    xspress3 3823272       1  0 14:49 ?        00:00:00 procServ -P 4005 /odin/config/stFrameProcessor2.sh
-    xspress3 3823275       1  0 14:49 ?        00:00:00 procServ -P 4006 /odin/config/stMetaWriter.sh
-    xspress3 3823278       1  0 14:49 ?        00:00:00 procServ -P 4007 /odin/config/stControlServer.sh
-    xspress3 3823281       1  0 14:49 ?        00:00:00 procServ -P 4008 /odin/config/stLiveViewMerge.sh
-    xspress3 3824263       1  0 14:50 ?        00:00:00 procServ -P 4009 /odin/config/stXspressADOdin.sh
-    xspress3 3824269       1  0 14:50 ?        00:00:00 procServ -P 9001 /odin/config/stProcServControl.sh
-    xspress3 3824266       1  0 14:50 ?        00:00:00 procServ -P 9002 /odin/config/stOdinProcServControl.sh
+    xspress3    4029    2399  0 Jul07 ?        00:00:05 procServ -P 4001 /odin/config/stOdinServer.sh
+    xspress3    4031    2399  0 Jul07 ?        00:00:05 procServ -P 4002 /odin/config/stMetaWriter.sh
+    xspress3    4033    2399  0 Jul07 ?        00:00:05 procServ -P 4003 /odin/config/stControlServer.sh
+    xspress3    4035    2399  0 Jul07 ?        00:00:05 procServ -P 4004 /odin/config/stLiveViewMerge.sh
+    xspress3    4037    2399  0 Jul07 ?        00:00:05 procServ -P 4005 /odin/config/stXspressADOdin.sh
+    xspress3    4039    2399  0 Jul07 ?        00:00:05 procServ -P 4010 /odin/config/stFrameReceiver1.sh
+    xspress3    4041    2399  0 Jul07 ?        00:00:05 procServ -P 4011 /odin/config/stFrameProcessor1.sh
+    xspress3    4043    2399  0 Jul07 ?        00:00:05 procServ -P 4012 /odin/config/stFrameReceiver2.sh
+    xspress3    4045    2399  0 Jul07 ?        00:00:05 procServ -P 4013 /odin/config/stFrameProcessor2.sh
+    xspress3    4047    2399  0 Jul07 ?        00:00:05 procServ -P 9001 /odin/config/stProcServControl.sh
+    xspress3    4049    2399  0 Jul07 ?        00:00:05 procServ -P 9002 /odin/config/stOdinProcServControl.sh
+
 
 
 You can telnet to these processes to interact with them. See the port number
