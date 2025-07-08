@@ -7,12 +7,23 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+0.3.4
+-----
+
+Changed:
+
+- Configuration enviroment is moved further away from the python module for odin
+  components so that they don't interfer with each otherwise
+- Changed the order of ODIN processes so that static ones are first and dynamic ones,
+  i.e frame processor and receiver which changes per card. 
+
+
 0.3.3
 -----
 
 Changed:
 
- - The procserv-Top window now extends to show all Frame recievers
+- The procserv-Top window now extends to show all Frame recievers
 
 
 0.3.2
@@ -20,18 +31,18 @@ Changed:
 
 Changed:
 
- - Config files are generated instead of copied.
+- Config files are generated instead of copied.
 
 Added:
 
- - Kill script added to scripts
+- Kill script added to scripts
 
 0.3.1
 -----
 
 Changed: 
 
- - Version of ADOdin (10-4qd-1-1) without resgrades
+- Version of ADOdin (10-4qd-1-1) without resgrades
 
 0.3.0
 -----

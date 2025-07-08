@@ -57,6 +57,13 @@ base_file_pv_name = "XSPRESS:OD"
     default=False,
     help="Plot every image (caps out at 10 plots to avoid sluggishness)",
 )
+@click.option(
+    "-tm",
+    "--trigger_mode",
+    type=int,
+    default=2,
+    help="Trigger mode (2: Burst, 3:Hardware)",
+)
 def main(
     images: int,
     acquire_time: float,
@@ -64,6 +71,7 @@ def main(
     file_dir: str,
     plot: bool,
     plot_all: bool,
+    trigger_mode: int,
 ):
     """Main entry point for acquisition script
 
@@ -88,7 +96,7 @@ def main(
 
     caput(f"{base_pv_name}:AcquireTime", acquire_time)
     caput(f"{base_pv_name}:NumImages", images)
-    caput(f"{base_pv_name}:TriggerMode", 2)
+    caput(f"{base_pv_name}:TriggerMode", trigger_mode)
 
     if file_name is not None:
         setup_file_writing(file_dir, file_name, images, acquire_time)

@@ -62,9 +62,7 @@ deactivate
 cd ..
 rm -rf conf_venv/
 
-sudo mkdir -p /odin/python/conf
-cp $module_path/dist/*.whl /odin/python/conf
+mkdir -p /odin/config/dist/
+cp $module_path/dist/*.whl /odin/config/dist/
 
-# Ownership
-chown -R xspress3 /odin
-chgrp -R xspress3 /odin
+

@@ -15,9 +15,10 @@ coverage.xml
 __pycache__/
 
 # Test directories
-test_data/
-dev_venv/
-test_venv/
+python/src/pyxspress/create_config/config/
+python/src/pyxspress/create_config/support/
 
 # Virtual enviroments
 server/conf_venv
+
+
