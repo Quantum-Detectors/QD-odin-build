@@ -1,7 +1,10 @@
-from pathlib import Path
-import os
 import shutil
 import subprocess
+from pathlib import Path
+
+from pyxspress.util.util import get_module_logger
+
+logger = get_module_logger(sub_module="substitutions")
 
 
 def _odin_data_template(num_cards):
@@ -18,7 +21,7 @@ def _xspress_channel_template(num_chans):
     xspress_chan_temp_string = ""
     for i in range(num_chans):
         xspress_chan_temp_string += (
-            '    {{ "XSPRESS", ":CAM:", "ODN.CAM", "'
+            '    { "XSPRESS", ":CAM:", "ODN.CAM", "'
             f'{i}", "{i+1}", "{num_chans}", "1" }}\n'
         )
     return xspress_chan_temp_string.strip("\n")
@@ -50,19 +53,31 @@ def _odin_procserv_template(num_cards):
     return odin_procserv_string.strip("\n")
 
 
-def xspress_expanded_substitutions(num_cards, num_chans, template_dir, test):
-    if not test:
-        files_dir = "/odin/epics/config/"
-        adodin_dir = Path("/odin/epics/support/ADOdin")
-    else:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        files_dir = f"{current_dir}/../support/ADOdin/expanded_substitustions/"
+def xspress_expanded_substitutions(
+    num_cards: int,
+    num_chans: int,
+    template_dir: Path,
+    adodin_dir: Path,
+    adodin_db_dir: Path,
+    epics_config_dir: Path,
+    test: bool,
+):
+    """ADOdin Xspress IOC template file
 
+    Args:
+        num_cards (int): Number of cards
+        num_chans (int): Number of channels
+        template_dir (Path): Template directory
+        adodin_dir (Path): Root of ADOdin
+        adodin_db_dir (Path): Where to write generated substitutions file
+        test (bool): True if in test mode (Does not deploy to ADOdin directory)
+    """
     odin_data_string = _odin_data_template(num_cards)
     xspress_channel_string = _xspress_channel_template(num_chans)
     xspress_fem_string = _xspress_fem_template(num_cards)
     odin_procserv_string = _odin_procserv_template(num_cards)
 
+    # Replace with Jinja?
     with open(
         template_dir / "xspress_expanded.substitutions.template", "r"
     ) as xspress_expanded_temp:
@@ -86,13 +101,19 @@ def xspress_expanded_substitutions(num_cards, num_chans, template_dir, test):
             "{odin_procserv_template}", odin_procserv_string
         )
 
-    file_path = Path(files_dir + "xspress_expanded.substitutions")
+    # We write the file to the `/odin/epics/config` directory so it can be
+    # re-deployed on the target server if ADOdin is rebuilt from source
+    # without having to re-create the file again
+    file_path = Path(epics_config_dir / "xspress_expanded.substitutions")
+    logger.info(f"Writing substitutions file {file_path}")
     with open(file_path, "w") as xspress_expanded_file:
         xspress_expanded_file.write(xspress_expanded_string)
 
     if not test:
-        if adodin_dir.exists() and adodin_dir.is_dir():  # Check if folder exists
-            shutil.copy(file_path, adodin_dir)  # Copy file
+        # If the ADOdin directory already exists then we can also deploy the
+        # IOC template file directory and rebuild ADOdin
+        if adodin_db_dir.exists() and adodin_db_dir.is_dir():
+            shutil.copy(file_path, adodin_db_dir)
             try:
                 subprocess.run(["make"], cwd=adodin_dir, check=True)
             except subprocess.CalledProcessError as e:

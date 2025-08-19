@@ -34,10 +34,17 @@ def setup_basic_logging(log_level: Union[int, str] = logging.INFO) -> logging.Lo
     return logger
 
 
-def get_module_logger() -> logging.Logger:
+def get_module_logger(sub_module: str | None = None) -> logging.Logger:
     """Get the module-wide logger
+
+    Args:
+        sub_module (str | None, optional): Optional sub-module to add to logger
+                                           name. Defaults to None.
 
     Returns:
         logging.Logger: Module logger
     """
-    return logging.getLogger(module_name)
+    if sub_module:
+        return logging.getLogger(f"{module_name}.{sub_module}")
+    else:
+        return logging.getLogger(module_name)

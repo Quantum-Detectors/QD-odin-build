@@ -64,13 +64,12 @@ xspress-list-mode-listener = "pyxspress.cli.list_mode_listener:main"
 xspress-list-mode-decode = "pyxspress.cli.list_mode_decode:main"
 xspress-plot = "pyxspress.cli.plot_data:main"
 xspress-view = "pyxspress.cli.data_gui:main"
-config-generate = "pyxspress.create_config.create:main"
+xspress-create-config = "pyxspress.cli.create_config:main"
 
 [tool.setuptools]
 # Use the src directory for the package
 package-dir = {"" = "src"}
 # Required packages to run the main application
-license-files = ["LICENCE.rst"]
 include-package-data = true
 
 [tool.setuptools.packages.find]

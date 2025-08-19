@@ -12,36 +12,14 @@ This repository contains the following components:
 
 - config: configuration files
 
-  - adodin: ADOdin database templates for the IOC to load
   - edm: runtime configuration for EDM
   - epics: synapps module versions and configure/RELEASE files for building
-  - odin: runtime configuration for Odin
 
 - python: Python module for generating configuration files and testing and
   using ADOdin
 - scripts: Build scripts for Odin and EPICS
 - server: Utility scripts for deploying onto a server
-
-
-Build scripts
-=============
-
-These are in the `scripts/` directory and are used to build all of the software
-components required for Odin and related software.
-
-- `scripts/epics_build.sh` - builds EPICS base and related modules and
-  applications
-- `scripts/odin_build.sh` - builds the core Odin binaries, Xspress Odin adapter
-  and Python modules into a venv. This support optional arguments to build only
-  certain components (useful for development). Use `-h` to see the options.
-- `scripts/kill_odin.sh` - kills all processes in Odin setup in the case of a broken configuration.
-
-
-These scripts have optional arguments. Run them with `-h` to view the options
-available - this includes building or rebuilding a subset of the components.
-
-Note: these are also copied into the Docker image when built (see Docker image
-section for more info).
+- xspress: Xspress binaries
 
 
 Server scripts
@@ -64,15 +42,53 @@ The following scripts are available:
 Note: the `dependencies` script should be run before trying to build the
 software
 
-Generate Config
-===============
 
-Once the copy_build_config and build_odin scripts have been run the `config-generate`
-entry point can be accessed. This has 3 possible arguments:
-- c/channels number of channels in the system. Default 8
-- m/mark the generation of the system (only Mk2 tested currently). Default 2
-- d/dir The directory that the configuration files will be generated to. Default "/odin/config"
-- t/test Makes files in place, useful for developer testing of the module.
+Build scripts
+=============
+
+These are in the `scripts/` directory and are used to build all of the software
+components required for Odin and related software. They are copied to the target
+server at `/odin/scripts` when the `copy_build_config.sh` script is run.
+
+- `scripts/epics_build.sh` - builds EPICS base and related modules and
+  applications
+- `scripts/odin_build.sh` - builds the core Odin binaries, Xspress Odin adapter
+  and Python modules into a venv. This support optional arguments to build only
+  certain components (useful for development). Use `-h` to see the options.
+- `scripts/kill_odin.sh` - kills all Odin processes.
+
+These scripts have optional arguments. Run them with `-h` to view the options
+available - this includes building or rebuilding a subset of the components.
+
+Note: these are also copied into the Docker image when built (see Docker image
+section for more info).
+
+
+Generating runtime configuration
+================================
+
+The Python module `pyxspress` can be used to generate the Odin runtime
+configuration.
+
+This is built into a Wheel and deployed with the `copy_build_config.sh`
+script and then built into a virtual environment which is added to the
+PATH with the `odin_build.sh` script.
+
+This means once these two scripts have been run you can call the entry
+point from any location in your terminal. You can run with `-h` to see
+the command line options.
+
+.. code::
+
+    xspress-create-config -h
+
+
+The following arguments are available:
+
+- `-c` number of channels in the system. Default 8
+- `-m`` the generation of the system (only Mk2 tested currently). Default 2
+- `-d` The directory that the configuration files will be generated to. Default `/odin/config`
+- `-t` Makes files in place, useful for developer testing of the module.
 
 
 Xspress binaries
@@ -93,10 +109,10 @@ The following steps can be used to install Odin software on a new server:
 1. Copy or clone this repository to the target server.
 2. Run `./server/dependencies.sh` to install all dependencies
 3. Run `./server/copy_build_config.sh` to set up the build
-4. Run `/odin/odin_build.sh` to build Odin components
-5. Run `/odin/epics/epics_build.sh` to build the EPICS components
-6. Run `config-generate` with the correct arguments to set up the
-   Odin runtime config - run with `-h` for more info.
+4. Run `/odin/scripts/odin_build.sh -a` to build all Odin components
+5. Run `/odin/scripts/epics_build.sh -a` to build all EPICS components
+6. Run `xspress-create-config` with the appropriate
+   arguments based on Xspress system (use `-h` to see options)
 7. Copy `./server/.bashrc_odin` to the home directory for `xspress3`
 8. Source the `~/.bashrc_odin` file from `~/.bashrc` so that the Odin
    environment is set up automatically. See below for an example entry
@@ -168,6 +184,16 @@ The EDM GUI is launched using the following script:
 .. code:: bash
 
     /odin/epics/support/ADOdin/iocs/xspress/bin/linux-x86_64/stxspress-gui
+
+
+Stopping Odin
+#############
+
+You can stop Odin procServ processes by running the following script:
+
+.. code:: bash
+
+    /odin/scripts/kill_odin.sh
 
 
 Python test module

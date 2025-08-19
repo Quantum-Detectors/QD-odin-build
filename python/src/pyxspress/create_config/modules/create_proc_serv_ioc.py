@@ -1,3 +1,6 @@
+from pathlib import Path
+
+
 def _odin_ports(num_cards):
     odin_ports_string = (
         'drvAsynIPPortConfigure("OdinServerPort", "localhost:4001", 100, 0, 0)\n'
@@ -28,9 +31,7 @@ def _odin_ports(num_cards):
 
 
 def _db_load_records(num_cards):
-    proc_temp = (
-        'dbLoadRecords "${PROCSERVCONTROL}/db/procServControl.template",'
-    )
+    proc_temp = 'dbLoadRecords "${PROCSERVCONTROL}/db/procServControl.template",'
     load_records_str = proc_temp + '"P=XSP-ODN-01, PORT=OdinServerPort"\n'
     load_records_str += proc_temp + '"P=XSP-ODN-02, PORT=OdinMetaPort"\n'
     load_records_str += proc_temp + '"P=XSP-ODN-03, PORT=ControlServerPort"\n'
@@ -63,19 +64,24 @@ def _post_IOC(num_cards):
     post_IOC_string += 'dbpf "XSP-ODN-04:IOCNAME" "Odin live view"\n'
     for i in range(num_cards):
         post_IOC_string += (
-            f'dbpf "XSP-ODN-{(i*2)+5:02d}:IOCNAME"'
-            f' "Odin frame receiver {i+1}"\n'
+            f'dbpf "XSP-ODN-{(i*2)+5:02d}:IOCNAME"' f' "Odin frame receiver {i+1}"\n'
         )
         post_IOC_string += (
-            f'dbpf "XSP-ODN-{(i*2)+6:02d}:IOCNAME" '
-            f'"Odin frame processor {i+1}"\n'
+            f'dbpf "XSP-ODN-{(i*2)+6:02d}:IOCNAME" ' f'"Odin frame processor {i+1}"\n'
         )
     post_IOC_string += 'dbpf "XSPRESS:IOCNAME" "Xspress ADOdin"'
 
     return post_IOC_string
 
 
-def proc_serv_ioc(num_cards, template_dir, files_dir):
+def proc_serv_ioc(num_cards: int, template_dir: Path, target_dir: Path):
+    """Create the procServIoc config file
+
+    Args:
+        num_cards (int): Number of cards
+        template_dir (Path): Template directory
+        target_dir (Path): Output directory
+    """
     odin_ports_str = _odin_ports(num_cards)
     db_load_str = _db_load_records(num_cards)
     proc_serv_str = _proc_serv_control(num_cards)
@@ -96,5 +102,23 @@ def proc_serv_ioc(num_cards, template_dir, files_dir):
             "{post_IOC}", post_ioc_str
         )
 
-    with open(files_dir / "proc_serv_ioc.boot", "w") as proc_serv_file:
+    with open(target_dir / "proc_serv_ioc.boot", "w") as proc_serv_file:
         proc_serv_file.write(proc_serv_file_string)
+
+
+def proc_serv_ioc_yaml(num_cards: int, template_dir: Path, target_dir: Path):
+    """Create the procServIOC YAML configuration
+
+    Args:
+        num_cards (int): Number of cards
+        template_dir (Path): Template directory
+        target_dir (Path): Output directory
+    """
+    processes = (num_cards * 2) + 4
+    with open(template_dir / "odin_proc_serv_ioc.yaml.template", "r") as yaml_temp:
+        yaml_string = yaml_temp.read()
+
+    yaml_string = yaml_string.replace("{processes}", str(processes))
+
+    with open(target_dir / "odin_proc_serv_ioc.yaml", "w") as yaml_file:
+        yaml_file.write(yaml_string)

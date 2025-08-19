@@ -1,4 +1,15 @@
-def frame_reciever(num_cards, template_dir, files_dir):
+import os
+from pathlib import Path
+
+
+def frame_reciever(num_cards: int, template_dir: Path, target_dir: Path):
+    """Create the frame receiver launch script
+
+    Args:
+        num_cards (int): Number of cards
+        template_dir (Path): Template directory
+        target_dir (Path): Output directory
+    """
 
     with open(template_dir / "stFrameReceiver.template", "r") as fr_t:
         template_string = fr_t.read()
@@ -6,11 +17,23 @@ def frame_reciever(num_cards, template_dir, files_dir):
         for card in range(num_cards):
             frame_reciever = template_string.replace("{card}", f"{(card + 1)}")
             frame_reciever = frame_reciever.replace("{num}", f"{(10*card):03d}")
-            with open(files_dir / f"stFrameReceiver{card+1}.sh", "w") as fr_file:
+
+            target_filepath = target_dir / f"stFrameReceiver{card+1}.sh"
+            with open(target_filepath, "w") as fr_file:
                 fr_file.write(frame_reciever)
 
+            # Make executable
+            os.chmod(target_filepath, 0o755)
 
-def frame_reciever_json(num_cards, template_dir, files_dir):
+
+def frame_reciever_json(num_cards: int, template_dir: Path, target_dir: Path):
+    """Create the frame receiver configuration file
+
+    Args:
+        num_cards (int): Number of cards
+        template_dir (Path): Template directory
+        target_dir (Path): Output directory
+    """
     with open(template_dir / "fr.json.template", "r") as fr_js_t:
         template_string = fr_js_t.read()
 
@@ -21,5 +44,5 @@ def frame_reciever_json(num_cards, template_dir, files_dir):
             frame_reciever = frame_reciever.replace(
                 "{release}", f"{(10 * card + 2):03d}"
             )
-            with open(files_dir / f"fr{card+1}.json", "w") as fr_json_file:
+            with open(target_dir / f"fr{card+1}.json", "w") as fr_json_file:
                 fr_json_file.write(frame_reciever)
