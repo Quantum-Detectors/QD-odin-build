@@ -11,6 +11,7 @@
 # Colours
 CYAN="\033[0;36m"
 GREEN="\033[1;32m"
+YELLOW="\033[0;33m"
 RED="\033[0;31m"
 NOCOL="\033[0m"
 
@@ -86,9 +87,9 @@ do
             echo "    -d : build Odin data"
             echo "    -x : build Xspress detector"
             echo "    -f : build Diamond HDF5 filters"
-            echo "    -p : build the Python environment and Odin Python components"
+            echo "    -p : build the Odin Python environment"
+            echo "    -c : build the Configuration Python enviroment"
             echo "    -i : rebuild C++ components in place (without re-fetching release)"
-            echo "    -c : build the configuration enviroment"
             echo "    -h : print this help message and exit."
             echo ""
             echo -e "${CYAN}=======================================================${NOCOL}"
@@ -315,19 +316,22 @@ fi
 
 
 # ============================================================
-# Config Python environment
+# Configuration Python environment
 # ============================================================
 #
 # This creates a virtual environment for the following components:
 # - config-generate
 # - acquisition scripts
+#
 
+# Track if we updated bashrc
+updated_bashrc=false
 
 if [[ $build_config_env == true ]]
 then
-    py_conf_venv="$root_dir/config/conf_venv"
-    conf_wheel="$root_dir/config/dist"
-    echo -e "${CYAN}BUILDING ODIN PYTHON ENVIRONMENT${NOCOL}"
+    py_conf_venv="$root_dir/util_python"
+    conf_wheel_dir="$root_dir/util_wheels"
+    echo -e "${CYAN}BUILDING CONFIGURATION PYTHON ENVIRONMENT${NOCOL}"
 
     # Clean current virtual environment
     rm -rf $py_conf_venv
@@ -338,15 +342,17 @@ then
     pip install --upgrade pip
 
     # Install pyxspress
-    pip install $conf_wheel/*.whl
+    find /odin/util_wheels -name "pyxspress*.whl" -exec pip install {}[cli] \;
 
     if ! grep -q 'export PATH=.*'"$py_conf_venv/bin" ~/.bashrc; then
+        echo -e "${CYAN} - adding configuration environment to PATH${NOCOL}"
+        echo "# Python environment for generating Xspress Odin configuration" >> ~/.bashrc
         echo "export PATH=\"\$PATH:$py_conf_venv/bin\"" >> ~/.bashrc
+        updated_bashrc=true
     else
-        echo "$py_conf_venv/bin is already in PATH"
+        echo -e "${CYAN} - configuration environment already on PATH${NOCOL}"
     fi
     deactivate
-    source ~/.bashrc
 
     echo -e "${GREEN}PYTHON CONFIG ENVIRONMENT COMPLETE${NOCOL}\n"
 fi
@@ -354,7 +360,7 @@ fi
 
 
 # ============================================================
-# Python environment
+# Odin Python environment
 # ============================================================
 #
 # This creates a virtual environment for the following components:
@@ -363,7 +369,7 @@ fi
 # - Xspress control
 #
 
-# Still available for other components that need the paths
+# Path to install to
 py_venv=$root_dir/python
 
 if [[ $build_python_env == true ]]
@@ -389,4 +395,11 @@ then
 
     echo -e "${GREEN}PYTHON ENVIRONMENT COMPLETE${NOCOL}\n"
 
+fi
+
+if [[ $updated_bashrc == true ]]
+then
+    echo -e "${YELLOW}============================${NOCOL}"
+    echo -e "${YELLOW} BASHRC UPDATED. SOURCE IT!${NOCOL}"
+    echo -e "${YELLOW}============================${NOCOL}\n"
 fi

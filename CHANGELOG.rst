@@ -7,6 +7,37 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+
+0.4.0
+-----
+
+Added:
+
+- Added additional command line argument for setting EPICS directory
+
+Changed:
+
+- Updated README based on current instructions
+- Only build pyxspress Wheel when copying build config
+- pyxspress Wheel now gets deployed to `/odin/util_wheels`
+- Moved configuration Python environment from `/odin/config/conf_venv` to
+  `/odin/util_python` to keep `/odin/config` cleaner
+- Moved Odin and EPICS build scripts to `/odin/scripts`
+- Renamed `config-generate` to `xspress-create-config` and moved to CLI module
+  using Click instead of argparse
+- Moved default target paths to the ConfigGenerator as class attributes
+
+Fixed:
+
+- Restored configuration files required for building EPICS modules and for
+  EDM runtime
+- Fix setuptools build warnings by adding init files to modules and templates
+  folders.
+- Fixed expanded substutions file not being copied to ADOdin IOC Db directory
+- Fixed double brace in Odin channel template string left over from f-string
+  formatting
+
+
 0.3.4
 -----
 
@@ -37,12 +68,14 @@ Added:
 
 - Kill script added to scripts
 
+
 0.3.1
 -----
 
 Changed: 
 
 - Version of ADOdin (10-4qd-1-1) without resgrades
+
 
 0.3.0
 -----

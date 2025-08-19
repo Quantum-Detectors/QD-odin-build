@@ -4,6 +4,9 @@ dist/
 deploy/
 *.egg-info/
 
+# Generated test config directory
+config/
+
 # IDE settings
 .vscode/
 
