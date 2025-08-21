@@ -42,6 +42,45 @@ The following scripts are available:
 Note: the `dependencies` script should be run before trying to build the
 software
 
+After these scripts have run (assuming a fresh state) the Odin directory should
+look something like the following:
+
+.. code:: bash
+
+    /odin/
+    ├── epics
+    │   ├── config
+    │   │   ├── RELEASE.local
+    │   │   ├── synapp_modules
+    │   │   └── xspress_IOC_RELEASE
+    │   └── edm
+    │       ├── colors.list
+    │       └── fonts.list
+    ├── scripts
+    │   ├── epics_build.sh
+    │   ├── kill_odin.sh
+    │   └── odin_build.sh
+    ├── util_wheels
+    │   └── pyxspress-0.5.0-py3-none-any.whl
+    └── xspress
+        ├── bin
+        │   ├── imgd
+        │   └── xspress3.server
+        ├── include
+        │   ├── datamod.h
+        │   ├── femConfig.h
+        │   ├── lmk_clocks.h
+        │   ├── mainpage.h
+        │   ├── os9types.h
+        │   ├── xspress3_data_mod.h
+        │   ├── xspress3_dma_protocol.h
+        │   ├── xspress3_fem_api.h
+        │   ├── xspress3.h
+        │   └── xspress3_v7_clocks.h
+        └── lib
+            ├── libimg_mod.so.1.0.0
+            └── libxspress3.so.1.0.0
+
 
 Build scripts
 =============
@@ -70,9 +109,9 @@ Generating runtime configuration
 The Python module `pyxspress` can be used to generate the Odin runtime
 configuration.
 
-This is built into a Wheel and deployed with the `copy_build_config.sh`
-script and then built into a virtual environment which is added to the
-PATH with the `odin_build.sh` script.
+The Wheel is deployed when running the `copy_build_config.sh` script
+and then built into a virtual environment that gets added to the user's
+PATH when running `odin_build.sh`.
 
 This means once these two scripts have been run you can call the entry
 point from any location in your terminal. You can run with `-h` to see
@@ -81,14 +120,6 @@ the command line options.
 .. code::
 
     xspress-create-config -h
-
-
-The following arguments are available:
-
-- `-c` number of channels in the system. Default 8
-- `-m`` the generation of the system (only Mk2 tested currently). Default 2
-- `-d` The directory that the configuration files will be generated to. Default `/odin/config`
-- `-t` Makes files in place, useful for developer testing of the module.
 
 
 Xspress binaries
@@ -196,11 +227,15 @@ You can stop Odin procServ processes by running the following script:
     /odin/scripts/kill_odin.sh
 
 
-Python test module
-==================
+pyxspress
+=========
 
-There is a python module at `python/src/pyxspress` which can be used to test
-some basic functionality.
+The built Wheel for this module is deployed using the `copy_build_config.sh`
+script. It is then installed in a dedicated virtual environment on the
+target server using `odin_build.sh` at `/odin/util_python`.
+
+This can be used to generated runtime configuration (see above) and also
+includes some basic CLI and GUI tools to look at Xspress Odin data.
 
 When installed the following entry points are available:
 
@@ -213,22 +248,6 @@ When installed the following entry points are available:
   and can either plot decoded time frames or save the data to a simpler HDF5
   format.
 
-You can use `pipenv` to create the Python virtual environment. Make sure you
-are in the `./python` folder of this repository before running!
-
-For example, setting up the environment and launching an entry point:
-
-.. code:: bash
-
-    ben@alyx qd-odin-build/python $ pipenv install --dev
-    ben@alyx qd-odin-build/python $ pipenv run xspress-view
-
-.. note::
-
-    For plotting you will also need Qt for the Matplotlib GUI. The current
-    version uses Qt5. This can be installed using your standard package
-    manager.
-
 
 Acquisition script
 ##################
@@ -237,7 +256,7 @@ You can use the `-h` help argument to see what options are available:
 
 .. code:: bash
 
-    ben@Alyx qd-odin-build/python $ pipenv run xspress-acquire -h
+    xspress3@xspress3 $ xspress-acquire -h
     Usage: xspress-acquire [OPTIONS]
 
     Run a basic internally-triggered acquisition and optionally save the data.
@@ -265,21 +284,14 @@ to print the list of options:
 
 .. code:: bash
 
-    python python/plot_data.py --help
-    python -m python.plot_data --help
+    xspress3@xspress3 $ xspress-plot -h
+    Usage: xspress-plot [OPTIONS] FILENAME CHANNEL
 
+    Plot the dataset for an Xspress channel
 
-An example dummy file is included at `python/testing/example_A_file.h5`. This
-can be used as a test to make sure the application is working:
-
-.. code:: bash
-
-    ben@Alyx qd-odin-build/python $ pipenv run xspress-plot ./testing/example_A_file.h5
-    Reading dataset mca_0 from ./example_A_file.h5
-    Available datasets: ['data', 'mca_0', 'mca_1', 'mca_2', 'mca_3']
-    Got data of shape: (10, 1, 4096)
-    Plotting first frame only
-    Index of maximum: 1985
+    Options:
+    -af, --all_frames  Print all frames
+    -h, --help         Show this message and exit.
 
 
 .. note::
@@ -299,6 +311,16 @@ can be used as a test to make sure the application is working:
     .. code:: bash
 
         h5repack -f NONE compressed.h5 bloated.h5
+
+
+Data viewer GUI
+###############
+
+A basic data viewer can be run using the following command:
+
+.. code:: bash
+
+    xspress3@xspress3 $ xspress-view
 
 
 Docker image

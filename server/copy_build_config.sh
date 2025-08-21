@@ -30,51 +30,38 @@ root_dir="$(dirname $script_dir)"
 # Directories
 echo -e "${CYAN}Creating deployment directories${NOCOL}"
 sudo mkdir -p /odin
-sudo chown xspress3 /odin
-sudo chgrp xspress3 /odin
+sudo chown $USER /odin
+sudo chgrp $USER /odin
 
 # EPICS configuration files
 echo -e "${CYAN}Copying EPICS build configuration files${NOCOL}"
 mkdir -p /odin/epics/config
-cp $root_dir/config/epics/synapp_modules /odin/epics/config
-cp $root_dir/config/epics/RELEASE.local /odin/epics/config
-cp $root_dir/config/epics/xspress_IOC_RELEASE /odin/epics/config
+cp $root_dir/epics_config/synapp_modules /odin/epics/config
+cp $root_dir/epics_config/RELEASE.local /odin/epics/config
+cp $root_dir/epics_config/xspress_IOC_RELEASE /odin/epics/config
 
 # EDM configuration files
 echo -e "${CYAN}Copying EDM configuration files${NOCOL}"
 mkdir -p /odin/epics/edm
-cp $root_dir/config/edm/colors.list /odin/epics/edm
-cp $root_dir/config/edm/fonts.list /odin/epics/edm
+cp $root_dir/edm_config/colors.list /odin/epics/edm
+cp $root_dir/edm_config/fonts.list /odin/epics/edm
 
 # Xspress binaries
 echo -e "${CYAN}Copying Xspress binaries${NOCOL}"
-cp -r $root_dir/xspress /odin
+# Make sure old binaries are deleted
+rm -rf /odin/xspress
+cp -r $root_dir/xspress /odin/xspress
 
 # Copy build and utility scripts
 echo -e "${CYAN}Copying scripts${NOCOL}"
 mkdir -p /odin/scripts
 cp $root_dir/scripts/*.sh /odin/scripts/
 
-# Build and copy Python config wheel
-echo -e "${CYAN}Building and deploying pyxspress${NOCOL}"
-module_path=$root_dir/python
-
-# Generate the wheel
-rm -rf conf_venv
-python3.11 -m venv conf_venv/
-source conf_venv/bin/activate
-pip install --upgrade pip
-pip install build
-cd $module_path
-python -m build -w .
-deactivate
-
-# Remove the build environment
-cd ..
-rm -rf conf_venv/
-
-# Copy the Wheel
+# Copy the pyxspress Wheel
+echo -e "${CYAN}Copying pyxspress Wheel${NOCOL}"
 mkdir -p /odin/util_wheels/
-cp $module_path/dist/*.whl /odin/util_wheels/
+# Make sure old wheels are deleted
+rm -f /odin/util_wheels/*.whl
+cp $root_dir/wheels/*.whl /odin/util_wheels/
 
 echo -e "${GREEN}Configuration copied successfully${NOCOL}\n"

@@ -7,6 +7,24 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+0.5.0
+-----
+
+Changed:
+
+- Moved pyxspress to separate repository and just use a built Wheel for
+  deployment
+- `copy_build_config.sh` now uses the current user to set permissions, which
+  is useful when testing on a developer system.
+- Split `/config` directory into `/edm_config` and `/epics_config` to avoid
+  name conflict when generating runtime Xspress Odin configuration in test
+  mode (which uses the CWD)
+
+Fixed:
+
+- Remove existing pyxspress wheels when copying server configuration
+- Remove existing Xspress binaries when copying server configuration
+
 
 0.4.0
 -----
