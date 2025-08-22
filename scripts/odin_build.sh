@@ -236,14 +236,13 @@ then
         cd $root_dir
         rm -rf $xspress_det_dir
 
-        git clone https://github.com/Quantum-Detectors/xspress-detector.git $xspress_det_dir
-
         # Get release using git
         # NOTE: this is because git describe is used to set version macros which determine
         # the version Odin reported by the C++ controller - which is missing if we use
         # wget.
+        git clone https://github.com/Quantum-Detectors/xspress-detector.git $xspress_det_dir
         cd $xspress_det_dir
-        git checkout 0.5.0+qd0.2
+        git checkout 0.5.0+qd0.3
     fi
 
     # Build and install Xspress detector
