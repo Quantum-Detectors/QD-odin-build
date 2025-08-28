@@ -37,3 +37,6 @@ sudo yum -y install procServ telnet
 
 # Other tools
 sudo yum -y install procps numactl
+
+# Cursor for pyxspress GUI
+sudo yum -y install libxcb xcb-util*
