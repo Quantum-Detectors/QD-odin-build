@@ -10,6 +10,10 @@ Versioning <https://semver.org/spec/v2.0.0.html>`_.
 Unreleased
 ----------
 
+Added:
+
+- Added missing XCB dependencies needed for Qt6 (used by pyxspress for the GUI)
+
 Changed:
 
 - Updated xspress-detector to 0.5.0+qd0.3 to fix the number of processes configured
