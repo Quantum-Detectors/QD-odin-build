@@ -7,8 +7,9 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
-Unreleased
-----------
+
+0.6.0
+-----
 
 Added:
 
@@ -16,8 +17,16 @@ Added:
 
 Changed:
 
-- Updated xspress-detector to 0.5.0+qd0.3 to fix the number of processes configured
-  when using list mode
+- Updated xspress-detector to 0.5.0+qd0.4
+
+  - fix the number of processes configured when using list mode
+  - separate datasets use for each event field
+
+- Updated to pyxpress 0.6.0 to add support for separate list mode datasets
+
+  - Updates the configuration generated for the frame processors
+  - Updates support for viewing the new list mode datasets in the xspress-view
+    GUI
 
 
 0.5.0
