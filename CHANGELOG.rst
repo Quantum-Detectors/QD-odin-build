@@ -8,6 +8,36 @@ The format is based on `Keep a Changelog
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
+0.7.0
+-----
+
+Changed:
+
+- Updated to pyxspress 0.7.0
+
+  - Add `xspress-list-mode-check` script to check ordering of events in a saved
+    acquisition
+  - Set `XSP3READOUT` to `frames` in the control server script to set default
+    readout mode to be optimised for MCA data
+  - `xspress-list-mode-decode` now writes HDF5 files in the same format as Odin
+    using separate datasets for each event field
+  - Changed default run flags in IOC boot script template to Scalers and Hist
+    without playback data
+  - Fixed issue with example Python list mode decoder not correctly checking the
+    source channel of a TCP packet matches the channels it is looking for
+
+- Updated to xspress-detector 0.5.0+qd0.5
+
+  - Increases size of list mode frame decoder buffers from 5 to 12,800 (100MB)
+  - Added logging checks for timestamps and time frames going back in time -
+    which is a side-effect of running out of receiver buffers
+  - The Xspress channel control register data source is now set to match the
+    run flag setting (ADC or playback data) when configuring the system
+  - The logic to flush and close the acquisition is tidied up in the list mode
+    processor to only be called once - whether the acquisition is stopped
+    manually or has reached the desired number of frames
+
+
 0.6.0
 -----
 
