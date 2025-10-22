@@ -8,6 +8,24 @@ The format is based on `Keep a Changelog
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
+0.8.0
+-----
+
+Changed:
+
+- Updated xspress-detector to 0.5.0+qd0.6
+
+  - Added muxing of TTL inputs so that the marekr channel data is input from TTL 0 and TTL 1
+  - Data can now be written from marker channels into hdf5 file in file '_A'
+
+- Updated to pyxspress 0.7.1
+
+  - Fixed issue with xspress-view crashing when opening list mode files with
+    marker channels
+  - Config generator now has a flag '-mc' to enable marker channels in the
+    generated configuration
+
+
 0.7.0
 -----
 
