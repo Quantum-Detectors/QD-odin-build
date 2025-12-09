@@ -7,6 +7,19 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+0.8.1
+-----
+
+Added:
+
+- TCP relay application TcpRelay to fan out Xspress list mode data to multiple
+  clients.
+
+Changed:
+
+- Updated to pyxspress 0.7.2 for TCP relay configuration support
+- Updated to xspress-detector to 0.5.0+qd0.7 for TCP relay server support
+
 
 0.8.0
 -----

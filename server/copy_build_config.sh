@@ -64,4 +64,10 @@ mkdir -p /odin/util_wheels/
 rm -f /odin/util_wheels/*.whl
 cp $root_dir/wheels/*.whl /odin/util_wheels/
 
+# Tools
+echo -e "${CYAN}Copying tools${NOCOL}"
+# Make sure old tools are deleted
+rm -rf /odin/tools
+cp -r $root_dir/tools /odin/tools
+
 echo -e "${GREEN}Configuration copied successfully${NOCOL}\n"
