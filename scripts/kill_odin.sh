@@ -12,3 +12,6 @@ pkill -e -9 'stFrameReceiver*'
 pkill -e -9 -f stLiveViewMerge.sh
 pkill -e -9 -f stOdinServer.sh
 pkill -e -9 -f stMetaWriter.sh
+
+pkill -e -9 -f TcpRelay
+pkill -e -9 -f stTcpRelay.sh

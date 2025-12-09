@@ -242,7 +242,7 @@ then
         # wget.
         git clone https://github.com/Quantum-Detectors/xspress-detector.git $xspress_det_dir
         cd $xspress_det_dir
-        git checkout 0.5.0+qd0.6
+        git checkout 0.5.0+qd0.7
     fi
 
     # Build and install Xspress detector
