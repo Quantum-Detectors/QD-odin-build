@@ -20,6 +20,10 @@ export EPICS_CA_AUTO_ADDR_LIST=NO
 export EPICS_CA_SERVER_PORT=6064
 export EPICS_CA_REPEATER_PORT=6065
 
+# Unset variable set by xspress3 in normal bashrc so we can see PVs
+# on both Odin IOCs
+unset EPICS_CAS_INTF_ADDR_LIST
+
 # HDF5 filters
 export HDF5_PLUGIN_PATH=/odin/prefix/h5plugin
 

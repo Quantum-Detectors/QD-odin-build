@@ -7,6 +7,21 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+0.8.2
+-----
+
+Changed:
+
+- Updated ADOdin to 0-10-4qd1-3 to fix incorrect numbering of software start/stop
+  and IDC trigger modes and also update the default Odin data path to /tmp so it
+  starts as a valid path
+- Updated pyxspress to 0.7.3 to generate ADOdin IOC with /tmp filepath as default
+- Updated xspress-detector to 0.5.0+qd0.8 to add detector acquire status and
+  frame counter when in X3X2 list mode
+- Now unsets EPICS_CAS_INTF_ADDR_LIST, normally set by xspress3 in the normal
+  bashrc file, in Odin bashrc file to see Odin IOC PVs
+
+
 0.8.1
 -----
 
