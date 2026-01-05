@@ -7,6 +7,19 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+0.8.3
+-----
+
+Changed:
+
+- Updated to xspress-detector 0.5.0+qd0.9 to enable resetting the timestamps at
+  the beginning of every acquisition to keep the marker channels and real
+  channels synchronised
+- Updated pyxspress to 0.7.4 to add list mode master datasets to frame processors
+  to indicate some form of file writing progress based on number of memory
+  blocks written (which is separate from the number of time frames written)
+
+
 0.8.2
 -----
 
