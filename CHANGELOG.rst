@@ -7,6 +7,20 @@ The format is based on `Keep a Changelog
 <https://keepachangelog.com/en/1.0.0/>`_, and this project adheres to `Semantic
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+0.8.4
+-----
+
+Changed:
+
+- Updated to xspress-detector 0.5.0+qd0.10 to fix frame processor crashing issue
+  when running an MCA acquisition due to allocating no memory for the initial
+  MCA data when file saving was not enabled.
+- Updated to pyxspress 0.7.5 to set master dataset of first frame processor
+  to second channel, even if marker channels are enabled. The number of memory
+  blocks written is then more comparable to other frame processors, assuming
+  similar event rates.
+
+
 0.8.3
 -----
 
