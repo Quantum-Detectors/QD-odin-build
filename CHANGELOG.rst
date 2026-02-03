@@ -8,6 +8,21 @@ The format is based on `Keep a Changelog
 Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
+0.8.6
+-----
+
+Added:
+
+- Updated to xspress-detector 0.5.0+qd0.11 
+- Updated xspress-detector to 0-10-4qd1-4
+- These changes introduce the reset timestamps option into the system. It adds a PV for control so the user can select
+  whether to reset timestamps at the start of each acquisition or not. By default, this is disabled.
+
+Changed:
+
+- EDM screen changed for the Xspress Odin control to change the size of the boxes to make them more readable.
+
+
 0.8.5
 -----
 
