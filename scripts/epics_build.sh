@@ -273,7 +273,7 @@ then
     rm -f $adodin_tar
 
     # Get release
-    wget https://github.com/Quantum-Detectors/ADOdin/archive/refs/tags/0-10-4qd1-4.tar.gz -O $adodin_tar
+    wget https://github.com/Quantum-Detectors/ADOdin/archive/refs/tags/0-10-4qd1-5.tar.gz -O $adodin_tar
 
     # Extract
     mkdir $adodin_dir
