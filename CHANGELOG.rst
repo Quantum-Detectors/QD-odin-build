@@ -12,7 +12,8 @@ Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 Updated:
 
-- updated pyxspress to 0.7.8, fixes live view endpoint
+- Updated pyxspress to 0.7.8 to set the live view merger PUB port to
+  15550 to match the new port expected by ADOdin from 0.8.7
 
 
 0.8.7
@@ -20,9 +21,10 @@ Updated:
 
 Changed:
 
-- Updated to pyxspress to 0.7.7
+- Updated to pyxspress to 0.7.7 to change the ADOdin live view endpoint to
+  15550 as the original port 15510 would conflict with a processor's PUB
+  port when there are more than 10 cards in a system
 - Updated ADOdin to 0-10-4qd1-5
-- Fixes competition of the 15510 port with larger systems.
 
 
 0.8.6
