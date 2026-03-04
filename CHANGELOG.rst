@@ -21,7 +21,7 @@ Updated:
 Changed:
 
 - Updated to pyxspress to 0.7.7
-- Updated xspress-detector to 0-10-4qd1-5
+- Updated ADOdin to 0-10-4qd1-5
 - Fixes competition of the 15510 port with larger systems.
 
 
@@ -31,7 +31,7 @@ Changed:
 Added:
 
 - Updated to xspress-detector 0.5.0+qd0.11 
-- Updated xspress-detector to 0-10-4qd1-4
+- Updated ADOdin to 0-10-4qd1-4
 - These changes introduce the reset timestamps option into the system. It adds a PV for control so the user can select
   whether to reset timestamps at the start of each acquisition or not. By default, this is disabled.
 
